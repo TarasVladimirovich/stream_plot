@@ -4,7 +4,7 @@ To run plot -> run in your venv.
 
 ## How to clone repo
 ```bash
-git clone
+git clone https://github.com/TarasVladimirovich/stream_plot.git
 
 ```
 Notice: don't forget to keep repo up-to-date.
