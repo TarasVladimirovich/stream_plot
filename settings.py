@@ -1,19 +1,31 @@
-import pandas as pd
-
-
 def get_layout(file_name):
 
     layout = dict(
-                  title=file_name,
-                  yaxis=dict({
-                            'title': "CPU Usage",
-                            }),
-                  xaxis=dict({
-                            'tickmode': 'array',
-                            'tickvals': [30, 90, 120, 150, 270],
-                            'title': "Time per 0.2 seconds",
-                            }),
+
+                  width=1500,
+                  height=800,
+                  title={
+                        'text': file_name,
+                        'x': 0.5,
+                        'y': 0.92,
+                        'xanchor': 'center'
+                        },
+                  yaxis={
+                        'title': "Percent, %",
+                        },
+                  xaxis={
+                        'tickmode': 'array',
+                        'tickvals': [30, 90, 120, 150, 270],
+                        'title': "Time per 0.2 seconds",
+                        'rangeslider': dict(
+                                            visible=True
+                                            ),
+                        },
+                  font={
+                        'size': 8,
+                        },
                   legend_title='<b> Processes </b>',
+
                   )
 
     return layout
@@ -45,18 +57,3 @@ def get_config(file_name):
 
     return config
 
-
-def reader(file):
-    with open(file, 'r') as f:
-        data = pd.read_csv(f, sep=' ')
-        file_name =f.name[f.name.rfind('/')+1:]
-    return {'data': data, 'file_name': file_name}
-
-
-def get_timestamp(data):
-    timestamp = list()
-    start = 0
-    for _ in range(len(data.idle)):
-        timestamp.append(round(start, 1))
-        start = start + 0.2
-    return timestamp

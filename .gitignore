@@ -1,6 +1,8 @@
 *.log
+plot_dev.py
 venv/
 .idea
 __pycache__/
 files/
 .DS_Store
+results/

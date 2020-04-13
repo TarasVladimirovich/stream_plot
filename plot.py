@@ -1,29 +1,24 @@
-import sys
-
-import plotly.graph_objects as go
+import re
 
 from settings import *
+from utils import *
 
 
 def main():
-    result = reader(sys.argv[1])
-    data = result['data']
-    file_name = result['file_name'].replace(".txt", "")
-    timestamp = get_timestamp(data)
-    traces = list()
-    for d in data:
-        traces.append(
-                     go.Scatter(
-                                x=timestamp,
-                                y=data[d],
-                                mode='lines',
-                                name=d,
-                                )
-                     )
-    fig = go.Figure(data=traces, layout=get_layout(file_name))
-    with open(f'{file_name}.html', 'w') as f:
-        f.write(fig.to_html(get_config(file_name)))
-    fig.to_html()
+    documents_to_work = (sys.argv[1:])
+
+    file_name = " VS ".join([doc[doc.rfind('/')+1:] for doc in documents_to_work]).replace(".txt", "")
+    figures = list()
+
+    for doc in documents_to_work:
+
+        fw = re.search('min-(.+?)-', doc).group(1)
+        data_frame = reader(doc)
+        figures += create_figure(data_frame, fw)
+
+    fig_sub = go.Figure(data=figures, layout=get_layout(file_name))
+
+    writer(file_name, fig_sub, get_config(file_name))
 
 
 if __name__ == '__main__':
