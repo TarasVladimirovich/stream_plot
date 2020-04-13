@@ -19,6 +19,7 @@ def main():
     fig_sub = go.Figure(data=figures, layout=get_layout(file_name))
 
     writer(file_name, fig_sub, get_config(file_name))
+    print('Done')
 
 
 if __name__ == '__main__':

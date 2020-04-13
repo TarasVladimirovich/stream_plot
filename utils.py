@@ -8,11 +8,15 @@ import plotly.graph_objects as go
 def reader(file):
     try:
         with open(file, 'r') as f:
-            data = pd.read_csv(f, sep=' ')
+            data_frame = pd.read_csv(f, sep=' ')
     except IOError as error:
         print(error)
         sys.exit(1)
-    return data
+    else:
+        if 'idle' not in data_frame.keys():
+            print('Error: Use new BASH script')
+            sys.exit(1)
+    return data_frame
 
 
 def writer(file_name, figure, config=None):
@@ -34,7 +38,7 @@ def writer(file_name, figure, config=None):
 def get_timestamp(data_frame):
     timestamp = list()
     start = 0
-    for _ in range(len(data_frame.idle)):
+    for _ in range(len(data_frame)):
         timestamp.append(round(start, 1))
         start = start + 0.2
     return timestamp

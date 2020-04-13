@@ -23,7 +23,7 @@ TO be continued.....
 # activate venv
 source VENVNAME/bin/activate
 
-# Run plot
+# Run plot in your VENV
 python3 plot.py FILENAME
 python3 plot.py FILENAME FILENAME2
 ```
