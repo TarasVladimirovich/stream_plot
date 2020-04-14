@@ -20,7 +20,7 @@ class Builder:
         for file in self.files:
             fw = re.search('min-(.+?)-', file).group(1)
             data_frame = self.__reader(file)
-            figures += self.__create_figure(data_frame, fw)
+            figures += self.__create_traces(data_frame, fw)
 
         fig_sub = go.Figure(data=figures, layout=get_layout(self.file_name))
         self.__writer(self.file_name, fig_sub, get_config(self.file_name))
@@ -61,7 +61,7 @@ class Builder:
             start = start + 0.2
         return timestamp
 
-    def __create_figure(self, data_frame, fw=""):
+    def __create_traces(self, data_frame, fw=""):
         traces = list()
         for data in data_frame:
             traces.append(
