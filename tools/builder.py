@@ -5,7 +5,7 @@ import re
 import pandas as pd
 import plotly.graph_objects as go
 
-from settings import get_config, get_layout
+from configs.settings import get_config, get_layout
 
 
 class Builder:

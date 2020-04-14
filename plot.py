@@ -1,6 +1,6 @@
 from sys import argv
 
-from builder import Builder
+from tools.builder import Builder
 
 if __name__ == '__main__':
     builder = Builder(argv[1:])

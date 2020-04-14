@@ -28,4 +28,3 @@ python3 plot.py FILENAME
 python3 plot.py FILENAME FILENAME2
 ```
 ##
-Now Plot is configured for 5min Test https://ring.testrail.net/index.php?/cases/view/38782854
