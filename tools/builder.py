@@ -18,7 +18,11 @@ class Builder:
         figures = list()
 
         for file in self.files:
-            fw = re.search('min-(.+?)-', file).group(1)
+            try:
+                fw = re.search('min-(.+?)-', file).group(1)
+            except AttributeError as error:
+                print(error)
+                fw = file[file.rfind('/')+1:]
             data_frame = self.__reader(file)
             figures += self.__create_traces(data_frame, fw)
 
