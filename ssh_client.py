@@ -29,7 +29,7 @@ HOST = '192.168.88.237'
 
 
 if __name__ == '__main__':
-    client = RemoteClient(HOST)
+    client = RemoteClient(argv[1])
     artifacts = client.get_artifacts()
     file_name = f'Stream-{artifacts["solution"]}-{artifacts["fw"]}-{artifacts["board_version"]}'
     artifacts.update(test_5_min(client=client, file_name=file_name))
