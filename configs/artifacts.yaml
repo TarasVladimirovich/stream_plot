@@ -1,0 +1,10 @@
+#pid:
+#    systemctl status stream | grep 'Main PID' | awk \{'print $3'\}
+board_version:
+    /ring/bin/rp get hw.board_version | cut -d ":" -f2
+mac:
+    ifconfig | grep wlan0 | cut -d " " -f10
+fw:
+    uname -r | cut -d ":" -f2
+solution:
+    /ring/bin/rp get stream.rms_enabled
