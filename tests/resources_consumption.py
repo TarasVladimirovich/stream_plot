@@ -46,16 +46,16 @@ def test_5_min(client, file_name='results.txt', time_out=300):
     client.execute_commands(['/ring/bin/ipc_cli dingRequest motion'])
     time.sleep(30)
     artifacts['ding_2'] = client.execute_command('/ring/bin/rp get ding.id | cut -d ":" -f2')
-    log.info('You must enable 2-way audio')
+    log.info('!!!! You must enable 2-way audio !!!!')
     time.sleep(120)
-    log.info('Stop stream')
+    log.info('!!!! Stop stream !!!!')
     client.execute_commands(['/ring/bin/ipc_cli streamStop'])
     time.sleep(30)
 
     __clean_setup(client)
     client.artifacts.update(artifacts)
     client.download_file(file=f'/tmp/{client.file_name}')
-    log.info('Stop test')
+    log.info('==== End test ====')
 
 
 def __clean_setup(client):

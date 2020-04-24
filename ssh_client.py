@@ -20,9 +20,10 @@ if __name__ == '__main__':
 
     test_5_min(client=client, file_name=client.file_name)
 
+    log.info("Create file")
     builder = Builder([client.saved_filepath])
     builder.create_file()
-
+    log.info("File crated")
     client.disconnect()
     log.info('====Done====')
 
