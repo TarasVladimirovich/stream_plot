@@ -19,7 +19,7 @@ class Builder:
 
         for file in self.files:
             try:
-                fw = re.search('min-(.+?)-', file).group(1)
+                fw = re.search('-.{3}-(.+?)-', file).group(1)
             except AttributeError as error:
                 print(error)
                 fw = file[file.rfind('/')+1:]
@@ -68,11 +68,15 @@ class Builder:
     def __create_traces(self, data_frame, fw=""):
         traces = list()
         for data in data_frame:
+            line = None
+            if data == 'memory':
+                line = dict(width=4, dash='solid')
             traces.append(
                 go.Scatter(
                     x=self.__get_timestamp(data_frame),
                     y=data_frame[data],
                     mode='lines',
+                    line=line,
                     name=f'{data} {fw}',
                 )
             )
