@@ -19,7 +19,7 @@ class Builder:
 
         for file in self.files:
             try:
-                fw = re.search('-.{3}-(.+?)-', file).group(1)
+                fw = re.search('-(.+?){3}-(.+?)-', file).group()[1:-1]
             except AttributeError as error:
                 print(error)
                 fw = file[file.rfind('/')+1:]
