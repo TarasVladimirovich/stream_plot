@@ -24,7 +24,11 @@ TO be continued.....
 source VENVNAME/bin/activate
 
 # Run plot in your VENV
+# Builds plot from fales:
 python3 plot.py FILENAME
 python3 plot.py FILENAME FILENAME2
+
+# Run resources test
+python ssh_client.py <IP_addr>
 ```
 ##
