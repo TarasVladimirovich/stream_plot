@@ -1,4 +1,5 @@
 import time
+import logging
 
 
 COMMANDS_PREPARE = ['mount -o remount,rw /', 'mkdir /usr/share/terminfo/d',
@@ -10,48 +11,53 @@ COMMANDS_CLEAN = ['rm -rf /usr/share/terminfo/d',
                   '/ring/bin/rp unset test.profile_id 3', '/ring/bin/rp unset test.bitrate 2500000',
                   'systemctl restart stream', 'mount -o remount,ro /']
 
+log = logging.getLogger(__name__)
+
 
 def __prepare_setup(client):
-    print(*COMMANDS_PREPARE, sep=' ; ')
+    log.info('Prepare setup \n {}'.format(' ;\n '.join(COMMANDS_PREPARE)))
     client.execute_commands(COMMANDS_PREPARE)
 
 
 def test_5_min(client, file_name='results.txt', time_out=300):
     artifacts = dict()
-    print("Prepare setup")
     __prepare_setup(client)
-    pid = client.get_info_from_remote_host("systemctl status stream | grep 'Main PID' | awk \{'print $3'\}")
+    pid = client.execute_command("systemctl status stream | grep 'Main PID' | awk \{'print $3'\}")
     time.sleep(3)
     part1 = f"timeout -t {time_out} top -b -d 0.2 -p {pid} "
     part2 = "| awk '/%Cpu/{idle=$8} /KiB Mem/{total=$4} /avail Mem/{avail=$9} /[0-9]+ root/{print idle,$9,$10}' "
     part3 = f">> /tmp/{file_name} & "
     command = part1 + part2 + part3
-    print('Start test')
+
+    log.info('==== Start test =====')
     client.execute_commands([f'echo idle stream memory > /tmp/{file_name}'])
     client.execute_commands([command])
+
     time.sleep(30)
-    print('Start the unanswered event')
+    log.info('!!!! Start the unanswered event !!!!')
     client.execute_commands(['/ring/bin/ipc_cli dingRequest motion'])
     time.sleep(5)
-    artifacts['ding_1'] = client.get_info_from_remote_host('/ring/bin/rp get ding.id | cut -d ":" -f2')
+    artifacts['ding_1'] = client.execute_command('/ring/bin/rp get ding.id | cut -d ":" -f2')
     time.sleep(55)
-    print('Stop the unanswered event')
+    log.info('!!!! Stop the unanswered event !!!!')
+
     time.sleep(30)
-    print('Start the answered event')
+    log.info('!!!! Start the answered event !!!!')
     client.execute_commands(['/ring/bin/ipc_cli dingRequest motion'])
     time.sleep(30)
-    artifacts['ding_2'] = client.get_info_from_remote_host('/ring/bin/rp get ding.id | cut -d ":" -f2')
-    print('You must enable 2-way audio')
+    artifacts['ding_2'] = client.execute_command('/ring/bin/rp get ding.id | cut -d ":" -f2')
+    log.info('You must enable 2-way audio')
     time.sleep(120)
-    print('Stop stream')
+    log.info('Stop stream')
     client.execute_commands(['/ring/bin/ipc_cli streamStop'])
     time.sleep(30)
-    print("Clean setup")
+
     __clean_setup(client)
-    print('Stop test')
-    return artifacts
+    client.artifacts.update(artifacts)
+    client.download_file(file=f'/tmp/{client.file_name}')
+    log.info('Stop test')
 
 
 def __clean_setup(client):
-    print(*COMMANDS_CLEAN, sep=' ; ')
+    log.info('Clean setup \n {}'.format(' ;\n '.join(COMMANDS_CLEAN)))
     client.execute_commands(COMMANDS_CLEAN)

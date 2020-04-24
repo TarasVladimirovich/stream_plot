@@ -68,11 +68,15 @@ class Builder:
     def __create_traces(self, data_frame, fw=""):
         traces = list()
         for data in data_frame:
+            line = None
+            if data == 'memory':
+                line = dict(width=4, dash='solid')
             traces.append(
                 go.Scatter(
                     x=self.__get_timestamp(data_frame),
                     y=data_frame[data],
                     mode='lines',
+                    line=line,
                     name=f'{data} {fw}',
                 )
             )

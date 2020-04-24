@@ -1,9 +1,12 @@
-from os import path, makedirs, getcwd
+from os import path, makedirs, getcwd, system
 import datetime
+import logging
 
 from paramiko import SSHClient, AutoAddPolicy, AuthenticationException
 from scp import SCPClient
 import yaml
+
+log = logging.getLogger(__name__)
 
 
 class RemoteClient:
@@ -11,12 +14,27 @@ class RemoteClient:
     def __init__(self, host, user='root', ssh_key_filepath='', remote_path=''):
         self.host = host
         self.user = user
-        self.client = self.__connect()
+        self.client = None
+        self.scp = None
+        self.artifacts = self.get_artifacts()
+        self.file_name = f'Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-{self.artifacts["board_version"]}.txt'
+        self.saved_filepath = ''
         # self.ssh_key_filepath = ssh_key_filepath
         # self.remote_path = remote_path
 
+    def __check_ping(self):
+        log.info(f'ping {self.host}')
+        response = system(f'ping -c 1 {self.host} >/dev/null 2>&1 ')
+        if response == 0:
+            log.info("Host is active, proceed the test")
+        else:
+            log.error('host is unreachable')
+            exit(1)
+        return response
+
     def __connect(self):
         """Open connection to remote host."""
+        self.__check_ping()
         try:
             self.client = SSHClient()
             self.client.load_host_keys(path.expanduser('~/.ssh/known_hosts'))
@@ -28,15 +46,17 @@ class RemoteClient:
                                 timeout=5000)
             self.scp = SCPClient(self.client.get_transport())
         except AuthenticationException as error:
-            print(error)
-            raise error
-        finally:
+            log.error(f'{error}, exit program')
+            exit(1)
+        else:
+            log.info('Create client')
             return self.client
 
     def disconnect(self):
         """Close ssh connection."""
         self.client.close()
         self.scp.close()
+        log.info('Disconnected')
 
     # for future upload files to remote host
     # def bulk_upload(self, files):
@@ -62,16 +82,25 @@ class RemoteClient:
     #         pass
 
     def download_file(self, file):
-        """Download file from remote host."""
-        if self.client is None:
-            self.client = self.__connect()
+        """
+        Download file from remote host.
+
+        :param file: File name from remote host.
+        :return: String with file path
+        """
+        if self.scp is None:
+            self.scp = self.__connect()
         try:
             makedirs('files', exist_ok=True)
         except OSError as error:
-            print(error)
-            self.scp.get(f'/tmp/{file}', getcwd())
+            self.scp.get(f'{file}')
+            self.saved_filepath = f'{self.file_name}'
+            log.error(error)
+            log.error(f'{file} file copied to {getcwd()}')
         else:
-            self.scp.get(f'/tmp/{file}', path.join('files'))
+            self.scp.get(f'{file}', path.join('files'))
+            self.saved_filepath = f'files/{self.file_name}'
+            log.info(f'{file} file copied to files folder')
 
     def execute_commands(self, commands):
         """
@@ -80,6 +109,7 @@ class RemoteClient:
         :param commands: List of unix commands as strings.
         """
         if self.client is None:
+            log.error('Create client')
             self.client = self.__connect()
         for cmd in commands:
             stdin, stdout, stderr = self.client.exec_command(cmd)
@@ -87,36 +117,38 @@ class RemoteClient:
             if status == 0:
                 response = stdout.readlines()
                 for line in response:
-                    print(line, end='')
+                    log.info(f'stderr: {line}')
             else:
                 for line in stderr.readlines():
-                    print('stderr: ', line, end='')
+                    log.error(f'stderr: {line}')
 
-    def get_info_from_remote_host(self, cmd):
+    def execute_command(self, cmd):
         """
         Execute command in succession.
 
-        :param command: Unix command as strings.
+        :param cmd: Unix command as strings.
         :return: String with information
         """
         if self.client is None:
             self.client = self.__connect()
-        info = None
+        info = ''
         stdin, stdout, stderr = self.client.exec_command(cmd)
         status = stdout.channel.recv_exit_status()
         if status == 0:
             info = stdout.read().decode().strip()
+            log.info(f'Collected next artifacts {info}')
         else:
-            print(f'{cmd} hasn"t received')
+            for line in stderr.readlines():
+                log.error('stderr: ', line)
         return info
 
     def get_artifacts(self):
         """Collect artifacts from DUT"""
         artifacts = dict()
-        with open ('configs/artifacts.yaml') as file:
+        with open('configs/artifacts.yaml') as file:
             tmp = yaml.load(file, Loader=yaml.FullLoader)
         for k, v in tmp.items():
-            artifacts[k] = self.get_info_from_remote_host(v)
+            artifacts[k] = self.execute_command(v)
         if 'unset' in artifacts['solution']:
             artifacts['solution'] = 'SIP'
         else:

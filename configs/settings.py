@@ -1,12 +1,15 @@
 def get_layout(file_name):
 
     layout = dict(
-                  width=1500,
+                  width=1600,
                   height=800,
                   title=dict(
-                        text=file_name,
+                        text=f"<b>{file_name}<b>",
                         x=0.5,
                         y=0.92,
+                        font=dict(
+                                  size=20
+                                 ),
                         xanchor='center',
                             ),
                   yaxis=dict(
@@ -16,7 +19,7 @@ def get_layout(file_name):
                         tickmode='array',
                         title='Time',
                         rangeslider=dict(
-                                    visible=True
+                                        visible=True,
                                         ),
                         ),
                   font=dict(
