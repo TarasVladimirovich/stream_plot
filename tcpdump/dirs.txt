@@ -1,0 +1,2 @@
+scp tcpdump root@192.168.2.11:/usr/sbin/
+scp libpcap.so* root@192.168.2.11:/usr/lib/

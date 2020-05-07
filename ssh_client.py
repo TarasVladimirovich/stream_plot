@@ -1,8 +1,8 @@
 from sys import argv
 import logging
 
-from tools.client import RemoteClient
-from tests.resources_consumption import test_5_min
+from tools.connection import RemoteClient
+from tests.test_resources_consumption import test_5_min
 
 from tools.builder import Builder
 
@@ -18,13 +18,13 @@ if __name__ == '__main__':
     client = RemoteClient(argv[1].strip())
     log.info(f"Create file{client.file_name}")
 
-    test_5_min(client=client, file_name=client.file_name)
+    test_5_min(client_setup=client)
 
     log.info("Create file")
     builder = Builder([client.saved_filepath])
     builder.create_file()
     log.info("File crated")
-    client.disconnect()
+    client.connection.disconnect()
     log.info('====Done====')
 
 
