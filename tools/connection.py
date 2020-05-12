@@ -1,8 +1,7 @@
-from os import path, makedirs, getcwd, system
-import datetime
-import logging
+from os import path, makedirs, getcwd
+from pathlib import Path
 
-import yaml
+import logging
 
 from tools.client import ClientHelper
 
@@ -17,14 +16,9 @@ class RemoteClient:
         self.connection = ClientHelper(self)
         self.client = self.connection.connect()
         self.scp = self.connection.create_scp_session()
-        self.artifacts = self.get_artifacts()
         self.saved_filepath = ''
         # self.ssh_key_filepath = ssh_key_filepath
         # self.remote_path = remote_path
-
-    @property
-    def file_name(self):
-        return f'Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-{self.artifacts["board_version"]}.txt'
 
     def download_file(self, file):
         """
@@ -33,17 +27,18 @@ class RemoteClient:
         :param file: File name from remote host.
         :return: String with file path
         """
+        abs_path = Path(__file__).parent.parent
         try:
-            makedirs('files', exist_ok=True)
+            makedirs(f'{abs_path}/files', exist_ok=True)
         except OSError as error:
-            self.scp.get(f'{file}')
-            self.saved_filepath = f'{self.file_name}'
+            self.scp.get(f'{file}', '/tmp')
+            self.saved_filepath = file
             log.error(error)
-            log.error(f'{file} file copied to {getcwd()}')
+            log.error(f'{file} file copied to {self.saved_filepath}')
         else:
-            self.scp.get(f'{file}', path.join('files'))
-            self.saved_filepath = f'files/{self.file_name}'
-            log.info(f'{file} file copied to files folder')
+            self.scp.get(f'{file}', path.join(abs_path, 'files'))
+            self.saved_filepath = f"{abs_path}/files/{file.replace('/tmp/', '')}"
+            log.info(f'{file} file copied to {self.saved_filepath}')
 
     def execute_commands(self, commands):
         """
@@ -57,7 +52,7 @@ class RemoteClient:
             if status == 0:
                 response = stdout.readlines()
                 for line in response:
-                    log.info(f'stderr: {line}')
+                    log.info(f'stdout: {line}')
             else:
                 for line in stderr.readlines():
                     log.error(f'stderr: {line}')
@@ -74,25 +69,11 @@ class RemoteClient:
         status = stdout.channel.recv_exit_status()
         if status == 0:
             info = stdout.read().decode().strip()
-            log.info(f'Return next information {info}')
+            log.debug(f'Return next information {info}')
         else:
             for line in stderr.readlines():
                 log.error('stderr: ', line)
         return info
-
-    def get_artifacts(self):
-        """Collect artifacts from DUT"""
-        artifacts = dict()
-        with open('configs/artifacts.yaml') as file:
-            tmp = yaml.load(file, Loader=yaml.FullLoader)
-        for k, v in tmp.items():
-            artifacts[k] = self.execute_command(v)
-        if 'unset' in artifacts['solution']:
-            artifacts['solution'] = 'SIP'
-        else:
-            artifacts['solution'] = 'RMS'
-        artifacts['date'] = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
-        return artifacts
 
     # for future upload files to remote host
     # def bulk_upload(self, files):

@@ -1,6 +1,7 @@
 from os import path, makedirs
 import sys
 import re
+from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -43,13 +44,14 @@ class Builder:
         return data_frame
 
     def __writer(self, file_name, figure, config=None):
+        abs_path = Path(__file__).parent.parent
         try:
-            makedirs("results", exist_ok=True)
+            makedirs(f'{abs_path}/results', exist_ok=True)
         except OSError as error:
             print(error)
             sys.exit(1)
         else:
-            file_name = path.join('results', f'{file_name}.html')
+            file_name = path.join(f'{abs_path}/results', f'{file_name}.html')
             try:
                 with open(file_name, 'w') as f:
                     f.write(figure.to_html(config))
