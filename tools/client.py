@@ -39,7 +39,7 @@ class ClientHelper:
             log.error(f'{error}, exit program')
             exit(1)
         else:
-            log.info('Create client_setup')
+            log.info('Create client')
             return client
 
     def create_scp_session(self):
@@ -50,7 +50,7 @@ class ClientHelper:
             log.error(f'{error}, exit program')
             exit(1)
         else:
-            log.info('Create client_setup')
+            log.info('Create scp transport')
             return scp
 
     def disconnect(self):

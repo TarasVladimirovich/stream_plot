@@ -5,18 +5,20 @@ from pathlib import Path
 
 import pandas as pd
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 from configs.settings import get_config, get_layout
 
 
 class Builder:
 
-    def __init__(self, files):
+    def __init__(self, files, artifacts=None):
         self.files = files
+        self.artifacts = artifacts
         self.file_name = " VS ".join([file[file.rfind('/') + 1:] for file in self.files]).replace(".txt", "")
 
     def create_file(self):
-        figures = list()
+        traces = list()
 
         for file in self.files:
             try:
@@ -25,12 +27,20 @@ class Builder:
                 print(error)
                 fw = file[file.rfind('/')+1:]
             data_frame = self.__reader(file)
-            figures += self.__create_traces(data_frame, fw)
+            traces += self.__create_traces(data_frame, fw)
 
-        fig_sub = go.Figure(data=figures, layout=get_layout(self.file_name))
-        self.__writer(self.file_name, fig_sub, get_config(self.file_name))
+        if self.artifacts is not None:
+            self.__create_subplots(traces=traces)
+        else:
+            figure = go.Figure(data=traces, layout=get_layout(self.file_name))
+            self.__writer(self.file_name, figure, get_config(self.file_name))
 
     def __reader(self, file):
+        """
+        Read file and create  data frame
+        :param file: CSV file with headers
+        :return: data_frame
+        """
         try:
             with open(file, 'r') as f:
                 data_frame = pd.read_csv(f, sep=' ')
@@ -44,6 +54,13 @@ class Builder:
         return data_frame
 
     def __writer(self, file_name, figure, config=None):
+        """
+
+        :param file_name: Name of file will be created
+        :param figure: Figure to file
+        :param config: config for saving file
+        :return:
+        """
         abs_path = Path(__file__).parent.parent
         try:
             makedirs(f'{abs_path}/results', exist_ok=True)
@@ -71,15 +88,60 @@ class Builder:
         traces = list()
         for data in data_frame:
             line = None
+            visible = True
             if data == 'memory':
                 line = dict(width=4, dash='solid')
+            if data == 'sys':
+                visible = 'legendonly'
             traces.append(
                 go.Scatter(
+                    visible=visible,
                     x=self.__get_timestamp(data_frame),
                     y=data_frame[data],
                     mode='lines',
                     line=line,
                     name=f'{data} {fw}',
-                )
+                ),
             )
         return traces
+
+    def __create_table(self, artifact):
+        return go.Table(
+            header=dict(
+                values=["<b>Name</b>", "<b>Value</b>"],
+                line_color='darkslategray',
+                fill_color='grey',
+                font=dict(color='white', size=12),
+                align="left"
+            ),
+            cells=dict(
+                values=[list(artifact.keys()), list(artifact.values())],
+                line_color='darkslategray',
+                fill_color='white',
+                align="left",
+                font=dict(color='darkslategray', size=12),
+                height=20,
+            )
+        )
+
+    def __create_subplots(self, traces):
+        fig_subplot = make_subplots(
+            rows=2, cols=2,
+            vertical_spacing=0.05,
+            specs=[[{"type": "scatter", "colspan": 2}, None],
+                   [{"type": "table"}, {"type": "table"}]
+                   ]
+        )
+
+        for trace in traces:
+            fig_subplot.add_trace(trace, col=1, row=1)
+
+        count = 0
+        for artifact in self.artifacts:
+            fig_subplot.add_trace(self.__create_table(artifact), row=2, col=1 + count)
+            count += 1
+
+        fig_subplot.update_layout(get_layout(self.file_name))
+        fig_subplot.update_layout(height=1200)
+        self.__writer(self.file_name, fig_subplot, get_config(self.file_name))
+

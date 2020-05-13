@@ -56,3 +56,5 @@ if __name__ == '__main__':
 
     d = Device(RemoteClient('192.168.88.236'))
     print(d.get_artifacts())
+    dd = d.get_artifacts()
+    # print(list(dd.keys()))

@@ -27,7 +27,7 @@ def device(request):
     device = Device(client)
 
     def client_teardown():
-        builder = Builder([device.client.saved_filepath])
+        builder = Builder([device.client.saved_filepath], [device.artifacts])
         builder.create_file()
         print("\ndisconnect")
         device.client.connection.disconnect()
