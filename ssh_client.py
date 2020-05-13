@@ -1,10 +1,13 @@
 from sys import argv
 import logging
 
-from tools.client import RemoteClient
-from tests.resources_consumption import test_5_min
+from tools.connection import RemoteClient
+from tools.resources import test_5_min
+
 
 from tools.builder import Builder
+from tools.device import Device
+from tools.connection import RemoteClient
 
 logging.basicConfig(format='%(asctime)s %(levelname)-8s %(message)-100s %(filename)s:%(funcName)s:%(lineno)d',
                     datefmt='%Y-%m-%dT%H:%M:%S',
@@ -16,15 +19,15 @@ log = logging.getLogger(__name__)
 
 if __name__ == '__main__':
     client = RemoteClient(argv[1].strip())
-    log.info(f"Create file{client.file_name}")
+    device = Device(client)
 
-    test_5_min(client=client, file_name=client.file_name)
+    test_5_min(device)
 
     log.info("Create file")
-    builder = Builder([client.saved_filepath])
+    builder = Builder([device.client.saved_filepath], [device.artifacts])
     builder.create_file()
     log.info("File crated")
-    client.disconnect()
+    device.client.connection.disconnect()
     log.info('====Done====')
 
 
