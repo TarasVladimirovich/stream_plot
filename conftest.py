@@ -1,7 +1,7 @@
 import pytest
 import logging
 
-from tools.connection import RemoteClient
+from tools.client import RemoteClient
 from tools.device import Device
 from tools.builder import Builder
 

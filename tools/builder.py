@@ -8,13 +8,15 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from configs.settings import get_config, get_layout
+from tools.reader import Reader
 
 
 class Builder:
 
-    def __init__(self, files, artifacts=None):
+    def __init__(self, files, artifacts=None, resources=None):
         self.files = files
         self.artifacts = artifacts
+        self.resources = resources
         self.file_name = " VS ".join([file[file.rfind('/') + 1:] for file in self.files]).replace(".txt", "")
 
     def create_file(self):
@@ -26,7 +28,7 @@ class Builder:
             except AttributeError as error:
                 print(error)
                 fw = file[file.rfind('/')+1:]
-            data_frame = self.__reader(file)
+            data_frame = Reader(file).reader()
             traces += self.__create_traces(data_frame, fw)
 
         if self.artifacts is not None:
@@ -124,6 +126,31 @@ class Builder:
             )
         )
 
+    def __create_table_resources(self, artifact):
+        df = pd.DataFrame.from_dict(artifact)
+        values = [''] + list(map(lambda p: f'<b>{p}</b>', list(df.columns)))
+        values1 = [list(df.index)]
+        print(values1)
+        values1 += list(df[data] for data in df)
+        print(df)
+        return go.Table(
+            header=dict(
+                values=values,
+                line_color='darkslategray',
+                fill_color='grey',
+                font=dict(color='white', size=12),
+                align="left"
+            ),
+            cells=dict(
+                values=values1,
+                line_color='darkslategray',
+                fill_color='white',
+                align="left",
+                font=dict(color='darkslategray', size=12),
+                height=20,
+            )
+        )
+
     def __create_subplots(self, traces):
         fig_subplot = make_subplots(
             rows=2, cols=2,
@@ -136,10 +163,8 @@ class Builder:
         for trace in traces:
             fig_subplot.add_trace(trace, col=1, row=1)
 
-        count = 0
-        for artifact in self.artifacts:
-            fig_subplot.add_trace(self.__create_table(artifact), row=2, col=1 + count)
-            count += 1
+        fig_subplot.add_trace(self.__create_table(self.artifacts), row=2, col=1)
+        fig_subplot.add_trace(self.__create_table_resources(self.resources), row=2, col=2)
 
         fig_subplot.update_layout(get_layout(self.file_name))
         fig_subplot.update_layout(height=1200)

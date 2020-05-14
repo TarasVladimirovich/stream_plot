@@ -2,7 +2,7 @@ from sys import argv
 
 from tools.builder import Builder
 from tools.device import Device
-from tools.connection import RemoteClient
+from tools.client import RemoteClient
 
 
 if __name__ == '__main__':
