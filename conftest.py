@@ -13,7 +13,7 @@ HOST = "192.168.88.236"
 
 COMMANDS_PREPARE = ['mount -o remount,rw /', 'mkdir /usr/share/terminfo/d',
                     'cp /usr/share/terminfo/v/vt100 /usr/share/terminfo/d/dumb',
-                    '/ring/bin/rp set test.profile_id 3', '/ring/bin/rp set test.bitrate 2500000',
+                    '/ring/bin/rp set test.profile_id 6', '/ring/bin/rp set test.bitrate 2500000',
                     'systemctl restart stream']
 
 COMMANDS_CLEAN = ['rm -rf /usr/share/terminfo/d',
