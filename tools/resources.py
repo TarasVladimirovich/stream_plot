@@ -21,15 +21,16 @@ def __prepare_setup(device):
 def test_5_min(device, time_out=300):
     artifacts = dict()
     __prepare_setup(device)
-    pid = device.client.execute_command("systemctl status stream | grep 'Main PID' | awk \{'print $3'\}")
+    pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
+    pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
     time.sleep(3)
-    part1 = f"timeout -t {time_out} top -b -d 0.2 -p {pid} "
-    part2 = "| awk '/%Cpu/{idle=$8} /%Cpu/{sys=$4} /[0-9]+ root/{print idle,$9,$10,sys}'"
+    part1 = f"timeout -t {time_out} top -b -d 0.2 -p {pid_stream}, {pid_pulse} "
+    part2 = "| awk '/%Cpu/{idle=$8} /%Cpu/{sys=$4} /[0-9]+ root/{cpu=$9} /[0-9]+ root/{mem=$10} /[0-9]+ pulse/{print idle,cpu,mem,$9,$10,sys}'"
     part3 = f">> /tmp/{device.file_name} & "
     command = part1 + part2 + part3
 
     log.info('==== Start test =====')
-    device.client.execute_commands([f'echo idle stream memory sys > /tmp/{device.file_name}'])
+    device.client.execute_commands([f'echo idle stream memory pulseaudio memPulse sys > /tmp/{device.file_name}'])
     device.client.execute_commands([command])
 
     time.sleep(30)

@@ -91,9 +91,9 @@ class Builder:
         for data in data_frame:
             line = None
             visible = True
-            if data == 'memory':
+            if data == 'memory' or data == 'memPulse':
                 line = dict(width=4, dash='solid')
-            if data == 'sys':
+            if data == 'sys' or data == 'memPulse':
                 visible = 'legendonly'
             traces.append(
                 go.Scatter(
@@ -128,21 +128,19 @@ class Builder:
 
     def __create_table_resources(self, artifact):
         df = pd.DataFrame.from_dict(artifact)
-        values = [''] + list(map(lambda p: f'<b>{p}</b>', list(df.columns)))
-        values1 = [list(df.index)]
-        print(values1)
-        values1 += list(df[data] for data in df)
-        print(df)
+        values_header = [''] + list(map(lambda p: f'<b>{p}</b>', list(df.columns)))
+        values_cells = [list(df.index)]
+        values_cells.extend(list(df[data] for data in df))
         return go.Table(
             header=dict(
-                values=values,
+                values=values_header,
                 line_color='darkslategray',
                 fill_color='grey',
                 font=dict(color='white', size=12),
                 align="left"
             ),
             cells=dict(
-                values=values1,
+                values=values_cells,
                 line_color='darkslategray',
                 fill_color='white',
                 align="left",
