@@ -87,13 +87,14 @@ class Builder:
         return timestamp
 
     def __create_traces(self, data_frame, fw=""):
+        hide = ['ivaapp', 'memPulse', 'sys']
         traces = list()
         for data in data_frame:
             line = None
             visible = True
             if data == 'memory' or data == 'memPulse':
                 line = dict(width=4, dash='solid')
-            if data == 'sys' or data == 'memPulse':
+            if data in hide:
                 visible = 'legendonly'
             traces.append(
                 go.Scatter(

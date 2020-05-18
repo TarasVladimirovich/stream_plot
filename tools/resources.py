@@ -23,14 +23,16 @@ def test_5_min(device, time_out=300):
     __prepare_setup(device)
     pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
     pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
+    pid_ivaapp = device.client.execute_command("systemctl status ivaapp | awk '/Main PID/{print $3}'")
     time.sleep(3)
-    part1 = f"timeout -t {time_out} top -b -d 0.2 -p {pid_stream}, {pid_pulse} "
-    part2 = "| awk '/%Cpu/{idle=$8} /%Cpu/{sys=$4} /[0-9]+ root/{cpu=$9} /[0-9]+ root/{mem=$10} /[0-9]+ pulse/{print idle,cpu,mem,$9,$10,sys}'"
-    part3 = f">> /tmp/{device.file_name} & "
-    command = part1 + part2 + part3
+
+    part1 = f"timeout -t {time_out} top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} "
+    part2 = f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}/{{cpu=$9, mem=$10}} /{pid_ivaapp}/{{cpuiv=$9}} " \
+            f"/{pid_pulse}/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
+    command = part1 + part2
 
     log.info('==== Start test =====')
-    device.client.execute_commands([f'echo idle stream memory pulseaudio memPulse sys > /tmp/{device.file_name}'])
+    device.client.execute_commands([f'echo idle stream memory pulseaudio memPulse ivaapp sys > /tmp/{device.file_name}'])
     device.client.execute_commands([command])
 
     time.sleep(30)
@@ -48,8 +50,8 @@ def test_5_min(device, time_out=300):
     artifacts['ding_2'] = device.client.execute_command('/ring/bin/rp get ding.id | cut -d ":" -f2')
     log.info('!!!! You must enable 2-way audio !!!!')
     time.sleep(120)
-    log.info('!!!! Stop stream !!!!')
     device.client.execute_commands(['/ring/bin/ipc_cli streamStop'])
+    log.info('!!!! Stop stream !!!!')
     time.sleep(30)
 
     __clean_setup(device)
