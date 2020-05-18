@@ -20,7 +20,7 @@ log = logging.getLogger(__name__)
 
 
 if __name__ == '__main__':
-    client = RemoteClient('192.168.88.236')
+    client = RemoteClient(argv[1].strip())
     device = Device(client)
     test_5_min(device)
 
