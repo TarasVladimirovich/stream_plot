@@ -88,21 +88,21 @@ if __name__ == '__main__':
     """
     """
 
-    device = Device(RemoteClient('192.168.88.236'))
+    # device = Device(RemoteClient('192.168.88.236'))
+    # #
+    # # print(d.avg_resources())
     #
-    # print(d.avg_resources())
-
-    pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
-    pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
-    pid_ivaapp = device.client.execute_command("systemctl status ivaapp | awk '/Main PID/{print $3}'")
-    part1 = f"top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} "
-    # part2 = "| awk '/%Cpu/{idle=$8} /%Cpu/{sys=$4} /[0-9]+ root/{cpu=$9} /[0-9]+ root/{mem=$10} " \
-    #         "/[0-9]+ pulse/{print idle,cpu,mem,$9,$10,sys}'"
-
-    part2 = f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}/{{cpu=$9, mem=$10}} /{pid_ivaapp}/{{cpuiv=$9}} " \
-            f"/{pid_pulse}/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
-
-    command = part1 + part2
-
-    print(command)
+    # pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
+    # pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
+    # pid_ivaapp = device.client.execute_command("systemctl status ivaapp | awk '/Main PID/{print $3}'")
+    # part1 = f"top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} "
+    # # part2 = "| awk '/%Cpu/{idle=$8} /%Cpu/{sys=$4} /[0-9]+ root/{cpu=$9} /[0-9]+ root/{mem=$10} " \
+    # #         "/[0-9]+ pulse/{print idle,cpu,mem,$9,$10,sys}'"
+    #
+    # part2 = f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}/{{cpu=$9, mem=$10}} /{pid_ivaapp}/{{cpuiv=$9}} " \
+    #         f"/{pid_pulse}/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
+    #
+    # command = part1 + part2
+    #
+    # print(command)
 
