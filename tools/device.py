@@ -60,8 +60,7 @@ class Device:
         HardCode Function
         :return:
         """
-        # df = Reader(self.client.saved_filepath).reader()
-        df = Reader('/Users/taraskoshletskyi/PycharmProjects/stream_plot/files/Stream-RMS-99.0.5652d-ORION_V1B1S10.txt').reader()
+        df = Reader(self.client.saved_filepath).reader()
         temp = {'average': dict(),
                 'ding_1': dict(),
                 'ding_2': dict(),
