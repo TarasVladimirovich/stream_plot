@@ -6,8 +6,7 @@ from math import isnan
 
 import yaml
 
-from tools.client import RemoteClient
-from tools.reader import Reader
+from tools.iohelper import IOhelper
 
 
 class Device:
@@ -58,9 +57,9 @@ class Device:
     def avg_resources(self):
         """
         HardCode Function
-        :return:
+        :return: Dictionary with resources
         """
-        df = Reader(self.client.saved_filepath).reader()
+        df = IOhelper().reader(self.client.saved_filepath)
         temp = {'average': dict(),
                 'ding_1': dict(),
                 'ding_2': dict(),
@@ -87,22 +86,5 @@ class Device:
 if __name__ == '__main__':
     """
     """
-
     # device = Device(RemoteClient('192.168.88.236'))
-    # #
-    # # print(d.avg_resources())
-    #
-    # pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
-    # pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
-    # pid_ivaapp = device.client.execute_command("systemctl status ivaapp | awk '/Main PID/{print $3}'")
-    # part1 = f"top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} "
-    # # part2 = "| awk '/%Cpu/{idle=$8} /%Cpu/{sys=$4} /[0-9]+ root/{cpu=$9} /[0-9]+ root/{mem=$10} " \
-    # #         "/[0-9]+ pulse/{print idle,cpu,mem,$9,$10,sys}'"
-    #
-    # part2 = f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}/{{cpu=$9, mem=$10}} /{pid_ivaapp}/{{cpuiv=$9}} " \
-    #         f"/{pid_pulse}/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
-    #
-    # command = part1 + part2
-    #
-    # print(command)
-
+    # print(d.avg_resources())

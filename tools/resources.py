@@ -21,15 +21,15 @@ def __prepare_setup(device):
 def test_5_min(device, time_out=300):
     artifacts = dict()
     __prepare_setup(device)
+
     pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
     pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
     pid_ivaapp = device.client.execute_command("systemctl status ivaapp | awk '/Main PID/{print $3}'")
     time.sleep(3)
 
-    part1 = f"timeout -t {time_out} top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} "
-    part2 = f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}/{{cpu=$9, mem=$10}} /{pid_ivaapp}/{{cpuiv=$9}} " \
-            f"/{pid_pulse}/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
-    command = part1 + part2
+    command = f"timeout -t {time_out} top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} " \
+              f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}/{{cpu=$9, mem=$10}} /{pid_ivaapp}/{{cpuiv=$9}} " \
+              f"/{pid_pulse}/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
 
     log.info('==== Start test =====')
     device.client.execute_commands([f'echo idle stream memory pulseaudio memPulse ivaapp sys > /tmp/{device.file_name}'])
@@ -54,9 +54,9 @@ def test_5_min(device, time_out=300):
     log.info('!!!! Stop stream !!!!')
     time.sleep(30)
 
-    __clean_setup(device)
     device.artifacts.update(artifacts)
     device.client.download_file(file=f'/tmp/{device.file_name}')
+    __clean_setup(device)
     log.info('==== End test ====')
 
 
