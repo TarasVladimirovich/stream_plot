@@ -86,5 +86,19 @@ class Device:
 if __name__ == '__main__':
     """
     """
+    # from tools.client import RemoteClient
+    # import time
+    #
     # device = Device(RemoteClient('192.168.88.236'))
-    # print(d.avg_resources())
+    #
+    # pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
+    # pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
+    # pid_ivaapp = device.client.execute_command("systemctl status ivaapp | awk '/Main PID/{print $3}'")
+    # time.sleep(3)
+    #
+    # command = f"top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} " \
+    #           f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}+ root/{{cpu=$9, mem=$10}} " \
+    #           f"/{pid_ivaapp}+ root/{{cpuiv=$9}} " \
+    #           f"/{pid_pulse}+ pulse/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
+    #
+    # print(command)
