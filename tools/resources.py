@@ -18,23 +18,27 @@ def __prepare_setup(device):
     device.client.execute_commands(COMMANDS_PREPARE)
 
 
-def test_5_min(device, time_out=300):
+def test_5_min(device, time_out=310):
     artifacts = dict()
     __prepare_setup(device)
+
+    device.client.execute_commands(
+        [f'echo idle stream memory pulseaudio memPulse ivaapp sys > /tmp/{device.file_name}'])
 
     pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
     pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
     pid_ivaapp = device.client.execute_command("systemctl status ivaapp | awk '/Main PID/{print $3}'")
     time.sleep(3)
 
+    log.info('==== Start test =====')
+
     command = f"timeout -t {time_out} top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} " \
-              f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}+ root/{{cpu=$9, mem=$10}} " \
+              f"| awk '/^%Cpu/{{idle=$8, sys=$4}} " \
+              f"/{pid_stream}+ root/{{cpu=$9, mem=$10}} " \
               f"/{pid_ivaapp}+ root/{{cpuiv=$9}} " \
               f"/{pid_pulse}+ pulse/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
 
-    log.info('==== Start test =====')
-    device.client.execute_commands([f'echo idle stream memory pulseaudio memPulse ivaapp sys > /tmp/{device.file_name}'])
-    device.client.execute_commands([command])
+    device.client.execute_command(command)
 
     time.sleep(30)
     log.info('!!!! Start the unanswered event !!!!')
@@ -45,11 +49,10 @@ def test_5_min(device, time_out=300):
     log.info('!!!! Stop the unanswered event !!!!')
 
     time.sleep(30)
-    log.info('!!!! Start the answered event !!!!')
+    log.info('!!!! Start the answered event with 2-way tolk event!!!!')
     device.client.execute_commands(['/ring/bin/ipc_cli dingRequest motion'])
     time.sleep(30)
     artifacts['ding_2'] = device.client.execute_command('/ring/bin/rp get ding.id | cut -d ":" -f2')
-    log.info('!!!! You must enable 2-way audio !!!!')
     time.sleep(120)
     device.client.execute_commands(['/ring/bin/ipc_cli streamStop'])
     log.info('!!!! Stop stream !!!!')

@@ -1,7 +1,9 @@
-from os import path, makedirs, getcwd
+from os import path, makedirs
 from pathlib import Path
+import sys
 
 import logging
+from scp import SCPException
 
 from tools.session import ClientHelper
 
@@ -28,17 +30,14 @@ class RemoteClient:
         :return: String with file path
         """
         abs_path = Path(__file__).parent.parent
+        makedirs(f'{abs_path}/files', exist_ok=True)
         try:
-            makedirs(f'{abs_path}/files', exist_ok=True)
-        except OSError as error:
-            self.scp.get(f'{file}', '/tmp')
-            self.saved_filepath = file
-            log.error(error)
-            log.error(f'{file} file copied to {self.saved_filepath}')
-        else:
             self.scp.get(f'{file}', path.join(abs_path, 'files'))
             self.saved_filepath = f"{abs_path}/files/{file.replace('/tmp/', '')}"
             log.info(f'{file} file copied to {self.saved_filepath}')
+        except SCPException as error:
+            log.error(error)
+            raise SCPException
 
     def execute_commands(self, commands):
         """

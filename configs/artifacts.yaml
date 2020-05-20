@@ -3,7 +3,7 @@
 board_version:
     /ring/bin/rp get hw.board_version | cut -d ":" -f2
 mac:
-    ifconfig | grep wlan0 | cut -d " " -f10
+    cat /sys/class/net/wlan0/address
 fw:
     uname -r | cut -d ":" -f2
 solution:

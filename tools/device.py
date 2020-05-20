@@ -3,6 +3,7 @@ from time import sleep
 from pathlib import Path
 import numpy as np
 from math import isnan
+from time import strftime
 
 import yaml
 
@@ -21,10 +22,12 @@ class Device:
     def __init__(self, client):
         self.client = client
         self.artifacts = self.get_artifacts()
+        self.timestr = strftime('%d-%m-%Y_%H:%M')
 
     @property
     def file_name(self):
-        return f'Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-{self.artifacts["board_version"]}.txt'
+        return f'{self.timestr}_Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-' \
+               f'{self.artifacts["board_version"]}.txt'
 
     def set_profile(self, profile=0):
         if profile > 3:
@@ -87,8 +90,6 @@ if __name__ == '__main__':
     """
     """
     # from tools.client import RemoteClient
-    # import time
-    #
     # device = Device(RemoteClient('192.168.88.236'))
     #
     # pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
