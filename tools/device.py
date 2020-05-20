@@ -102,4 +102,5 @@ if __name__ == '__main__':
     #           f"/{pid_ivaapp}+ root/{{cpuiv=$9}} " \
     #           f"/{pid_pulse}+ pulse/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
     #
-    # print(command)
+    # q = "20-05-2020_20:10_Stream-RMS-99.0.5659d-ORION_V1B1S10"
+    # print(q[q.find('S'):])

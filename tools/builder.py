@@ -21,7 +21,7 @@ class Builder:
 
         for file in self.files:
             try:
-                fw = re.search('-(.+?){3}-(.+?)-', file).group()[1:-1]
+                fw = re.search('-([A-Z]){3}-(.+?)-', file).group()[1:-1]
             except AttributeError as error:
                 print(error)
                 fw = file[file.rfind('/')+1:]
@@ -31,7 +31,7 @@ class Builder:
         if self.artifacts is not None:
             self.__create_subplots(traces=traces)
         else:
-            figure = go.Figure(data=traces, layout=get_layout(self.file_name))
+            figure = go.Figure(data=traces, layout=get_layout(self.file_name[self.file_name.find('S'):]))
             IOhelper.writer(self.file_name, figure, get_config(self.file_name))
 
     def __create_subplots(self, traces):
@@ -50,7 +50,7 @@ class Builder:
         if self.resources is not None:
             fig_subplot.add_trace(self.__create_table_resources(self.resources), row=2, col=2)
 
-        fig_subplot.update_layout(get_layout(self.file_name))
+        fig_subplot.update_layout(get_layout(self.file_name[self.file_name.find('S'):]))
         fig_subplot.update_layout(height=1200)
         IOhelper.writer(self.file_name, fig_subplot, get_config(self.file_name))
 
