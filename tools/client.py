@@ -1,60 +1,100 @@
+from os import path, makedirs, getcwd
+from pathlib import Path
+
 import logging
-from os import path, system
 
-from paramiko import SSHClient, AutoAddPolicy, AuthenticationException
-from scp import SCPClient
-
+from tools.session import ClientHelper
 
 log = logging.getLogger(__name__)
 
 
-class ClientHelper:
+class RemoteClient:
 
-    def __init__(self, connection):
-        self.connection = connection
+    def __init__(self, host, user='root', ssh_key_filepath='', remote_path=''):
+        self.host = host
+        self.user = user
+        self.connection = ClientHelper(self)
+        self.client = self.connection.connect()
+        self.scp = self.connection.create_scp_session()
+        self.saved_filepath = ''
+        # self.ssh_key_filepath = ssh_key_filepath
+        # self.remote_path = remote_path
 
-    def __check_ping(self):
-        log.info(f'ping {self.connection.host}')
-        response = system(f'ping -c 1 {self.connection.host} >/dev/null 2>&1 ')
-        if response == 0:
-            log.info("Host is active, proceed the test")
-        else:
-            log.error('host is unreachable')
-            exit(1)
-        return response
+    def download_file(self, file):
+        """
+        Download file from remote host.
 
-    def connect(self):
-        """Open connection to remote host."""
-        self.__check_ping()
+        :param file: File name from remote host.
+        :return: String with file path
+        """
+        abs_path = Path(__file__).parent.parent
         try:
-            client = SSHClient()
-            client.load_host_keys(path.expanduser('~/.ssh/known_hosts'))
-            client.set_missing_host_key_policy(AutoAddPolicy)
-            client.connect(self.connection.host,
-                           username=self.connection.user,
-                           password='',
-                           look_for_keys=False,
-                           timeout=5000)
-        except AuthenticationException as error:
-            log.error(f'{error}, exit program')
-            exit(1)
+            makedirs(f'{abs_path}/files', exist_ok=True)
+        except OSError as error:
+            self.scp.get(f'{file}', '/tmp')
+            self.saved_filepath = file
+            log.error(error)
+            log.error(f'{file} file copied to {self.saved_filepath}')
         else:
-            log.info('Create client')
-            return client
+            self.scp.get(f'{file}', path.join(abs_path, 'files'))
+            self.saved_filepath = f"{abs_path}/files/{file.replace('/tmp/', '')}"
+            log.info(f'{file} file copied to {self.saved_filepath}')
 
-    def create_scp_session(self):
-        """Create SCP session"""
-        try:
-            scp = SCPClient(self.connection.client.get_transport())
-        except AuthenticationException as error:
-            log.error(f'{error}, exit program')
-            exit(1)
+    def execute_commands(self, commands):
+        """
+        Execute multiple commands in succession.
+
+        :param commands: List of unix commands as strings.
+        """
+        for cmd in commands:
+            stdin, stdout, stderr = self.client.exec_command(cmd)
+            status = stdout.channel.recv_exit_status()
+            if status == 0:
+                response = stdout.readlines()
+                for line in response:
+                    log.info(f'stdout: {line}')
+            else:
+                for line in stderr.readlines():
+                    log.error(f'stderr: {line}')
+
+    def execute_command(self, cmd):
+        """
+        Execute command in succession.
+
+        :param cmd: Unix command as strings.
+        :return: String with information
+        """
+        info = ''
+        stdin, stdout, stderr = self.client.exec_command(cmd)
+        status = stdout.channel.recv_exit_status()
+        if status == 0:
+            info = stdout.read().decode().strip()
+            log.debug(f'Return next information {info}')
         else:
-            log.info('Create scp transport')
-            return scp
+            for line in stderr.readlines():
+                log.error('stderr: ', line)
+        return info
 
-    def disconnect(self):
-        """Close ssh connection."""
-        self.connection.client.close()
-        self.connection.scp.close()
-        log.info('Disconnected')
+    # for future upload files to remote host
+    # def bulk_upload(self, files):
+    #     """
+    #     Upload multiple files to a remote directory.
+    #
+    #     :param files: List of strings representing file paths to local files.
+    #     """
+    #     if self.client_setup is None:
+    #         self.client_setup = self.__connect()
+    #     uploads = [self.__upload_single_file(file) for file in files]
+    #
+    # def __upload_single_file(self, file):
+    #     """Upload a single file to a remote directory."""
+    #     try:
+    #         self.scp.put(file,
+    #                      recursive=True,
+    #                      remote_path=self.remote_path)
+    #     except SCPException as error:
+    #         print(error)
+    #         raise error
+    #     finally:
+    #         pass
+

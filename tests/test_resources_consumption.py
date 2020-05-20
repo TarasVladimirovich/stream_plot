@@ -33,8 +33,8 @@ def test_5_min(device, resources_prepare, time_out=300):
     artifacts['ding_2'] = device.client.execute_command('/ring/bin/rp get ding.id | cut -d ":" -f2')
     log.info('!!!! You must enable 2-way audio !!!!')
     time.sleep(120)
-    log.info('!!!! Stop stream !!!!')
     device.client.execute_commands(['/ring/bin/ipc_cli streamStop'])
+    log.info('!!!! Stop stream !!!!')
     time.sleep(30)
 
     device.artifacts.update(artifacts)
