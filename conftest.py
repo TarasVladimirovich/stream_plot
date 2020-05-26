@@ -27,8 +27,8 @@ def device(request):
     device = Device(client)
 
     def client_teardown():
-        builder = Builder([device.client.saved_filepath], [device.artifacts])
-        builder.create_file()
+        # builder = Builder([device.client.saved_filepath], [device.artifacts])
+        # builder.create_file()
         print("\ndisconnect")
         device.client.connection.disconnect()
 
@@ -36,12 +36,13 @@ def device(request):
     return device
 
 
-@pytest.fixture(scope="function", params=[
-    (0, '(640x360)'),
-    (1, '(848x480)'),
-    (2, '(1280x720)'),
-    (3, '(1920x1080)'),
-])
+# @pytest.fixture(scope="function", params=[
+#     (0, '(640x360)'),
+#     (1, '(848x480)'),
+#     (2, '(1280x720)'),
+#     (3, '(1920x1080)'),
+# ])
+@pytest.fixture(scope="function")
 def profile_fixture(request):
     return request.param
 
@@ -58,3 +59,12 @@ def resources_prepare(request, device):
         device.client.execute_commands(COMMANDS_CLEAN)
 
     request.addfinalizer(clean_setup)
+
+
+def pytest_addoption(parser):
+    parser.addoption(
+        '--profile',
+        action='store',
+        default=3,
+        type=int,
+        help='Choose profile')

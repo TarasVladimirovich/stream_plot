@@ -1,5 +1,5 @@
 import datetime
-from time import sleep
+import logging
 from pathlib import Path
 import numpy as np
 from math import isnan
@@ -8,39 +8,57 @@ from time import strftime
 import yaml
 
 from tools.iohelper import IOhelper
+from lib.ipc import IPC
+from lib.rp import RP
+
+
+logger = logging.getLogger(__name__)
 
 
 class Device:
 
-    PROFILES = {
-                 0: 234567,
-                 1: 534567,
-                 2: 1234567,
-                 3: 1534567,
-                }
+    # PROFILES = {
+    #              0: 234567,
+    #              1: 534567,
+    #              2: 1234567,
+    #              3: 1534567,
+    #             }
 
     def __init__(self, client):
         self.client = client
         self.artifacts = self.get_artifacts()
         self.timestr = strftime('%d-%m-%Y_%H:%M')
+        self.ipc = IPC(self.client)
+        self.rp = RP(self.client)
 
     @property
     def file_name(self):
         return f'{self.timestr}_Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-' \
                f'{self.artifacts["board_version"]}.txt'
 
-    def set_profile(self, profile=0):
-        if profile > 3:
-            profile = 3
-        elif profile < 0:
-            profile = 0
-        self.client.execute_commands([f'/ring/bin/rp set stream.probed_bitrate {self.PROFILES[profile]}',
-                                      'systemctl restart stream'])
-        sleep(5)
+    def restart_service(self, service='stream'):
+        logger.info(f'restart service {service}')
+        self.client.execute_command(f'systemctl restart {service}')
+
+    def make_write_fs(self):
+        logger.info('make file system for writing')
+        self.client.execute_command('mount -o remount,rw /')
+
+    def make_read_fs(self):
+        logger.info('make file reead only')
+        self.client.execute_command('mount -o remount,ro /')
+
+    def service_pid(self, service: str) -> str:
+        return self.client.execute_command(
+            f"systemctl status {service} | awk '/Main PID/{{print $3}}'")
 
     def show_stream_info(self):
-        info = self.client.execute_command('test_encode --show-stream-info | grep Resolution')
-        return info.split('\n')[0].split(':')[1].strip()
+        info = (
+            self.client.execute_command(
+                "test_encode --show-stream-info | awk 'FNR==8{res=$3} FNR==13{print res, $4}' "
+            )
+        )
+        return info
 
     def get_artifacts(self):
         """Collect artifacts from DUT"""
@@ -90,17 +108,10 @@ if __name__ == '__main__':
     """
     """
     # from tools.client import RemoteClient
-    # device = Device(RemoteClient('192.168.88.236'))
-    #
-    # pid_stream = device.client.execute_command("systemctl status stream | awk '/Main PID/{print $3}'")
-    # pid_pulse = device.client.execute_command("systemctl status pulseaudio | awk '/Main PID/{print $3}'")
-    # pid_ivaapp = device.client.execute_command("systemctl status ivaapp | awk '/Main PID/{print $3}'")
-    # time.sleep(3)
-    #
-    # command = f"top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} " \
-    #           f"| awk '/^%Cpu/{{idle=$8, sys=$4}} /{pid_stream}+ root/{{cpu=$9, mem=$10}} " \
-    #           f"/{pid_ivaapp}+ root/{{cpuiv=$9}} " \
-    #           f"/{pid_pulse}+ pulse/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /tmp/{device.file_name} & "
-    #
-    # q = "20-05-2020_20:10_Stream-RMS-99.0.5659d-ORION_V1B1S10"
-    # print(q[q.find('S'):])
+    # c = RemoteClient('192.168.88.236')
+    # d = Device(c)
+    # pid_stream, pid_pulse, pid_ivaapp = d.service_pid('stream'), \
+    #                                     d.service_pid('pulseaudio'), d.service_pid('ivaapp')
+    # print(pid_stream)
+    # print(pid_pulse)
+    # print(pid_ivaapp)
