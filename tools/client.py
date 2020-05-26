@@ -1,6 +1,5 @@
 from os import path, makedirs
 from pathlib import Path
-import sys
 
 import logging
 from scp import SCPException
@@ -39,40 +38,30 @@ class RemoteClient:
             log.error(error)
             raise SCPException
 
-    def execute_commands(self, commands):
-        """
-        Execute multiple commands in succession.
-
-        :param commands: List of unix commands as strings.
-        """
+    def execute_commands(self, commands: list):
         for cmd in commands:
-            stdin, stdout, stderr = self.client.exec_command(cmd)
-            status = stdout.channel.recv_exit_status()
-            if status == 0:
-                response = stdout.readlines()
-                for line in response:
-                    log.info(f'stdout: {line}')
-            else:
-                for line in stderr.readlines():
-                    log.error(f'stderr: {line}')
+            self.execute_command(cmd)
 
-    def execute_command(self, cmd):
+    def execute_command(self, cmd: str):
         """
         Execute command in succession.
 
         :param cmd: Unix command as strings.
         :return: String with information
         """
-        info = ''
         stdin, stdout, stderr = self.client.exec_command(cmd)
         status = stdout.channel.recv_exit_status()
         if status == 0:
-            info = stdout.read().decode().strip()
-            log.debug(f'Return next information {info}')
+            response = stdout.readlines()
+            if len(response) == 1:
+                response = response[0].strip()
+                return response
+            else:
+                for line in response:
+                    log.info(f'stdout: {line}')
         else:
             for line in stderr.readlines():
-                log.error('stderr: ', line)
-        return info
+                log.error(line)
 
     # for future upload files to remote host
     # def bulk_upload(self, files):

@@ -1,20 +1,21 @@
 from time import sleep
 
+import pytest
+
 from tools.device import Device
 
-PROFILES = {
-    0: '(640x360)',
-    1: '(848x480)',
-    2: '(1280x720)',
-    3: '(1920x1080)',
-}
+PROFILES = [
+    [0, '(640x360) 10/10'],
+    [1, '(848x480) 15/15'],
+    [2, '(1280x720) 15/15'],
+    [3, '(1920x1080) 15/15'],
+]
 
 
-# def test_profile(device, profile_fixture):
-#     device = device
-#     (input, expected_output) = profile_fixture
-#     device.set_profile(input)
-#     assert device.show_stream_info() == expected_output
+@pytest.mark.parametrize('profile, expected', PROFILES)
+def test_profile(device, profile, expected):
+    device.set_profile(profile)
+    assert device.show_stream_info() == expected
 
 
 def test_probed(device):
