@@ -59,7 +59,7 @@ class Builder:
         start = 0
         for _ in range(len(data_frame)):
             timestamp.append(round(start, 1))
-            start = start + 0.2
+            start = start + 0.5
         return timestamp
 
     def __create_traces(self, data_frame, fw=""):
@@ -120,5 +120,3 @@ class Builder:
                 height=20,
             )
         )
-
-
