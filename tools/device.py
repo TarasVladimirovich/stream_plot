@@ -111,18 +111,7 @@ class Device:
 if __name__ == '__main__':
     """
     """
-    from tools.client import RemoteClient
-    c = RemoteClient('192.168.88.236')
-    d = Device(c)
-    pid_stream, pid_pulse, pid_ivaapp = d.service_pid('stream'), \
-        d.service_pid('pulseaudio'), d.service_pid('ivaapp')
+    #from tools.client import RemoteClient
+    #c = RemoteClient('192.168.88.236')
+    #d = Device(c)
 
-    logger.info('==== Start test =====')
-
-    command = f"timeout -t 3600 top -b -d 0.5 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} " \
-              f"| awk '/^%Cpu/{{idle=$8, sys=$4}} " \
-              f"/{pid_stream}+ root/{{cpu=$9, mem=$10}} " \
-              f"/{pid_ivaapp}+ root/{{cpuiv=$9}} " \
-              f"/{pid_pulse}+ pulse/{{print idle,cpu,mem,$9,$10,cpuiv,sys}}' >> /root/2.3.00050d.txt & "
-
-    print(command)

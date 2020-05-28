@@ -60,7 +60,6 @@ def test_5_min(device, profile, bitrate, time_out=310):
     artifacts['ding_1'] = device.rp.get_ding_id()
     time.sleep(55)
     device.ipc.stream_stop()
-
     time.sleep(30)
     logger.info('!!!! Start the answered event with 2-way talk event!!!!')
     device.ipc.ding_request(DingType.MOTION)
