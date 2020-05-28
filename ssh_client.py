@@ -19,8 +19,8 @@ log = logging.getLogger(__name__)
 
 @click.command()
 @click.option('--ip-addr', default='', help='Insert ip addres.', type=str)
-@click.option('--profile',  default=6, help='Choose profile.', type=int)
-@click.option('--bitrate',  default=2500000, help='Set bitrate.', type=int)
+@click.option('--profile',  default=None, help='Choose profile.', type=int)
+@click.option('--bitrate',  default=None, help='Set bitrate.', type=int)
 def main(ip_addr, profile, bitrate):
     client = RemoteClient(ip_addr)
     device = Device(client)

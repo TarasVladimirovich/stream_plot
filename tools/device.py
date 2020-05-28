@@ -1,10 +1,9 @@
 import datetime
 import logging
 from pathlib import Path
-import numpy as np
-from math import isnan
 from time import strftime
 
+import pandas as pd
 import yaml
 
 from tools.iohelper import IOhelper
@@ -68,50 +67,51 @@ class Device:
             tmp = yaml.load(file, Loader=yaml.FullLoader)
         for k, v in tmp.items():
             artifacts[k] = self.client.execute_command(v)
-        if 'unset' in artifacts['solution']:
-            artifacts['solution'] = 'SIP'
-        else:
-            artifacts['solution'] = 'RMS'
+        artifacts['solution'] = 'SIP' if 'unset' in artifacts['solution'] else 'RMS'
         artifacts['date'] = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
         return artifacts
 
     def avg_resources(self):
         """
-        HardCode Function
+        Need to refactor
         :return: Dictionary with resources
         """
         df = IOhelper().reader(self.client.saved_filepath)
-        temp = {'average': dict(),
-                'ding_1': dict(),
-                'ding_2': dict(),
-                }
+        # df = IOhelper().reader(
+        #     "/Users/taraskoshletskyi/Downloads/1.txt"
+        # )
         for data in df:
-            tmp_number = 0
-            for i in range(df[data].size):
-                try:
-                    float(df[data][i])
-                    if isnan(float(df[data][i])):
-                        df.iloc[i, df.columns.get_loc(data)] = tmp_number
-                    tmp_number = float(df[data][i])
-                except ValueError:
-                    df.iloc[i, df.columns.get_loc(data)] = tmp_number
-            if df[data].dtypes != np.float64:
-                df[data] = df[data].astype(float)
+            df[data] = pd.to_numeric(df[data], errors='coerce')
+        df = df.fillna(0)
 
-            temp['average'].update({data: round(sum(df[data]) / df[data].size, 3)})
-            temp['ding_1'].update({data: round(sum(df[data].loc[5*30:5*91]) / df[data].loc[5*30:5*91].size, 3)})
-            temp['ding_2'].update({data: round(sum(df[data].loc[5*120:5*271]) / df[data].loc[5*120:5*271].size, 3)})
+        temp = {'average': dict(),
+                'before': dict(),
+                'ding_1': dict(),
+                'between': dict(),
+                'ding_2': dict(),
+                'after': dict(),
+                }
+
+        for data in df:
+            temp['average'].update(
+                {data: round(df[data].sum() / df[data].size, 3)})
+            temp['before'].update(
+                {data: round((df[data].loc[:2*29].sum()) / df[data].loc[:2*29].size, 3)})
+            temp['ding_1'].update(
+                {data: round(df[data].loc[2*30:2*91].sum() / df[data].loc[2*30:2*91].size, 3)})
+            temp['between'].update(
+                {data: round(df[data].loc[2*92:2*119].sum() / df[data].loc[2*92:2*119].size, 3)})
+            temp['ding_2'].update(
+                {data: round(df[data].loc[2*120:2*271].sum() / df[data].loc[2*120:2*271].size, 3)})
+            temp['after'].update(
+                {data: round(df[data].loc[2*271:].sum() / df[data].loc[2*271:].size, 3)})
         return temp
 
 
 if __name__ == '__main__':
     """
     """
-    # from tools.client import RemoteClient
-    # c = RemoteClient('192.168.88.236')
-    # d = Device(c)
-    # pid_stream, pid_pulse, pid_ivaapp = d.service_pid('stream'), \
-    #                                     d.service_pid('pulseaudio'), d.service_pid('ivaapp')
-    # print(pid_stream)
-    # print(pid_pulse)
-    # print(pid_ivaapp)
+    #from tools.client import RemoteClient
+    #c = RemoteClient('192.168.88.236')
+    #d = Device(c)
+

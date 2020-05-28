@@ -15,8 +15,10 @@ def test_5_min(device, profile, bitrate, time_out=310):
         commands_prepare = ['mkdir /usr/share/terminfo/d',
                             'cp /usr/share/terminfo/v/vt100 /usr/share/terminfo/d/dumb']
         device.client.execute_commands(commands_prepare)
-        device.rp.set_profile(profile)
-        device.rp.set_test_bitrate(bitrate)
+        if profile is not None:
+            device.rp.set_profile(profile)
+        if bitrate is not None:
+            device.rp.set_test_bitrate(bitrate)
         device.restart_service('stream')
         logger.info('==== END PREPARE =====')
 
@@ -41,7 +43,7 @@ def test_5_min(device, profile, bitrate, time_out=310):
 
     logger.info('==== Start test =====')
 
-    command = f"timeout -t {time_out} top -b -d 0.2 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} " \
+    command = f"timeout -t {time_out} top -b -d 0.5 -p {pid_stream}, {pid_pulse}, {pid_ivaapp} " \
               f"| awk '/^%Cpu/{{idle=$8, sys=$4}} " \
               f"/{pid_stream}+ root/{{cpu=$9, mem=$10}} " \
               f"/{pid_ivaapp}+ root/{{cpuiv=$9}} " \
@@ -58,8 +60,6 @@ def test_5_min(device, profile, bitrate, time_out=310):
     artifacts['ding_1'] = device.rp.get_ding_id()
     time.sleep(55)
     device.ipc.stream_stop()
-    logger.info('!!!! Stop the unanswered event !!!!')
-
     time.sleep(30)
     logger.info('!!!! Start the answered event with 2-way talk event!!!!')
     device.ipc.ding_request(DingType.MOTION)
