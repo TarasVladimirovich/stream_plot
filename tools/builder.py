@@ -57,7 +57,7 @@ class Builder:
     def __get_timestamp(self, data_frame):
         timestamp = list()
         start = 0
-        for _ in range(len(data_frame)):
+        for _ in range(data_frame.size):
             timestamp.append(round(start, 1))
             start = start + 0.5
         return timestamp

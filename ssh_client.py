@@ -21,13 +21,14 @@ log = logging.getLogger(__name__)
 @click.option('--ip-addr', default='', help='Insert ip addres.', type=str)
 @click.option('--profile',  default=None, help='Choose profile.', type=int)
 @click.option('--bitrate',  default=None, help='Set bitrate.', type=int)
-def main(ip_addr, profile, bitrate):
+@click.option('--idle', is_flag=True, help='set flag, if need check IDLE')
+def main(ip_addr, profile, bitrate, idle):
     client = RemoteClient(ip_addr)
     device = Device(client)
-    test_5_min(device, profile, bitrate)
+    test_5_min(device, profile, bitrate, idle)
 
     log.info("Create file")
-    builder = Builder([device.client.saved_filepath], device.artifacts, device.avg_resources())
+    builder = Builder([device.client.saved_filepath], device.artifacts, device.avg_resources(idle))
     builder.create_file()
     device.client.connection.disconnect()
     log.info('====Done====')
