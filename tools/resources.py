@@ -7,7 +7,8 @@ from lib.ipc import DingType
 logger = logging.getLogger(__name__)
 
 
-def test_5_min(device, profile, bitrate, time_out=310):
+def test_5_min(device, profile, bitrate, idle=False, time_out=310):
+    artifacts = dict()
 
     def prepare_setup():
         logger.info('==== START PREPARE =====')
@@ -17,9 +18,12 @@ def test_5_min(device, profile, bitrate, time_out=310):
         device.client.execute_commands(commands_prepare)
         if profile is not None:
             device.rp.set_profile(profile)
+            artifacts['Profile'] = profile
         if bitrate is not None:
             device.rp.set_test_bitrate(bitrate)
+            artifacts['Test bitrate'] = bitrate
         device.restart_service('stream')
+        artifacts['Resolution'] = device.show_stream_info()
         logger.info('==== END PREPARE =====')
 
     def clean_setup():
@@ -31,7 +35,6 @@ def test_5_min(device, profile, bitrate, time_out=310):
         device.restart_service('stream')
         logger.info('==== END POSTCONDITION =====')
 
-    artifacts = dict()
     prepare_setup()
     time.sleep(3)
     device.client.execute_commands(
@@ -53,23 +56,27 @@ def test_5_min(device, profile, bitrate, time_out=310):
 
     device.client.execute_command(command)
 
-    time.sleep(30)
-    logger.info('!!!! Start the unanswered event !!!!')
-    device.ipc.ding_request(DingType.MOTION)
-    time.sleep(5)
-    artifacts['ding_1'] = device.rp.get_ding_id()
-    time.sleep(55)
-    device.ipc.stream_stop()
-    time.sleep(30)
-    logger.info('!!!! Start the answered event with 2-way talk event!!!!')
-    device.ipc.ding_request(DingType.MOTION)
-    time.sleep(30)
-    artifacts['ding_2'] = device.rp.get_ding_id()
-    time.sleep(120)
-    device.ipc.stream_stop()
-    time.sleep(30)
+    if idle:
+        time.sleep(310)
+    else:
+        time.sleep(30)
+        logger.info('!!!! Start the unanswered event !!!!')
+        device.ipc.ding_request(DingType.MOTION)
+        time.sleep(5)
+        artifacts['ding_1'] = device.rp.get_ding_id()
+        time.sleep(55)
+        device.ipc.stream_stop()
+        time.sleep(30)
+        logger.info('!!!! Start the answered event with 2-way talk event!!!!')
+        device.ipc.ding_request(DingType.MOTION)
+        time.sleep(30)
+        artifacts['ding_2'] = device.rp.get_ding_id()
+        time.sleep(120)
+        device.ipc.stream_stop()
+        time.sleep(40)
 
     device.artifacts.update(artifacts)
+    print(device.artifacts)
     device.client.download_file(file=f'/tmp/{device.file_name}')
     logger.info('==== End test ====')
 
