@@ -22,17 +22,22 @@ def test_5_min(device, profile, bitrate, idle=False, time_out=310):
         if bitrate is not None:
             device.rp.set_test_bitrate(bitrate)
             artifacts['Test bitrate'] = bitrate
-        device.restart_service('stream')
+        if not idle:
+            device.restart_service('stream')
+        time.sleep(2)
         artifacts['Resolution'] = device.show_stream_info()
         logger.info('==== END PREPARE =====')
 
     def clean_setup():
         logger.info('==== START POSTCONDITION =====')
-        device.rp.unset_profile()
-        device.rp.unset_test_bitrate()
+        if profile is not None:
+            device.rp.unset_profile()
+        if bitrate is not None:
+            device.rp.unset_test_bitrate()
         device.client.execute_command('rm -rf /usr/share/terminfo/d')
         device.make_read_fs()
-        device.restart_service('stream')
+        if not idle:
+            device.restart_service('stream')
         logger.info('==== END POSTCONDITION =====')
 
     prepare_setup()
@@ -76,7 +81,6 @@ def test_5_min(device, profile, bitrate, idle=False, time_out=310):
         time.sleep(40)
 
     device.artifacts.update(artifacts)
-    print(device.artifacts)
     device.client.download_file(file=f'/tmp/{device.file_name}')
     logger.info('==== End test ====')
 
