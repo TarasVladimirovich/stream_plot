@@ -43,7 +43,7 @@ def test_5_min(device, profile, bitrate, idle=False, time_out=310):
     prepare_setup()
     time.sleep(3)
     device.client.execute_commands(
-        [f'echo idle stream memory pulseaudio memPulse ivaapp sys > /tmp/{device.file_name}'])
+        [f'echo idle Stream StreamMem Pulseaudio PulseMem Ivaapp sys > /tmp/{device.file_name}'])
 
     pid_stream, pid_pulse, pid_ivaapp = device.service_pid('stream'), \
         device.service_pid('pulseaudio'), device.service_pid('ivaapp')

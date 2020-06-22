@@ -63,12 +63,12 @@ class Builder:
         return timestamp
 
     def __create_traces(self, data_frame, fw=""):
-        hide = ['ivaapp', 'memPulse', 'sys']
+        hide = ['Ivaapp', 'PulseMem', 'sys']
         traces = list()
         for data in data_frame:
             line = None
             visible = True
-            if data == 'memory' or data == 'memPulse':
+            if 'Mem' in data:
                 line = dict(width=4, dash='solid')
             if data in hide:
                 visible = 'legendonly'

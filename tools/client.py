@@ -58,7 +58,7 @@ class RemoteClient:
                 return response
             else:
                 for line in response:
-                    log.info(f'stdout: {line}')
+                    log.info(line)
         else:
             for line in stderr.readlines():
                 log.error(line)
@@ -85,4 +85,3 @@ class RemoteClient:
     #         raise error
     #     finally:
     #         pass
-

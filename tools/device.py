@@ -10,18 +10,10 @@ from tools.iohelper import IOhelper
 from lib.ipc import IPC
 from lib.rp import RP
 
-
 logger = logging.getLogger(__name__)
 
 
 class Device:
-
-    # PROFILES = {
-    #              0: 234567,
-    #              1: 534567,
-    #              2: 1234567,
-    #              3: 1534567,
-    #             }
 
     def __init__(self, client):
         self.client = client
@@ -77,9 +69,6 @@ class Device:
         :return: Dictionary with resources
         """
         df = IOhelper().reader(self.client.saved_filepath)
-        # df = IOhelper().reader(
-        #     "/Users/taraskoshletskyi/Downloads/1.txt"
-        # )
         for data in df:
             df[data] = pd.to_numeric(df[data], errors='coerce')
         df = df.fillna(0)
@@ -102,24 +91,13 @@ class Device:
                 temp['average'].update(
                     {data: round(df[data].sum() / df[data].size, 3)})
                 temp['before'].update(
-                    {data: round((df[data].loc[:2*29].sum()) / df[data].loc[:2*29].size, 3)})
+                    {data: round((df[data].loc[:2 * 29].sum()) / df[data].loc[:2 * 29].size, 3)})
                 temp['ding_1'].update(
-                    {data: round(df[data].loc[2*30:2*91].sum() / df[data].loc[2*30:2*91].size, 3)})
+                    {data: round(df[data].loc[2 * 30:2 * 91].sum() / df[data].loc[2 * 30:2 * 91].size, 3)})
                 temp['between'].update(
-                    {data: round(df[data].loc[2*92:2*119].sum() / df[data].loc[2*92:2*119].size, 3)})
+                    {data: round(df[data].loc[2 * 92:2 * 119].sum() / df[data].loc[2 * 92:2 * 119].size, 3)})
                 temp['ding_2'].update(
-                    {data: round(df[data].loc[2*120:2*271].sum() / df[data].loc[2*120:2*271].size, 3)})
+                    {data: round(df[data].loc[2 * 120:2 * 271].sum() / df[data].loc[2 * 120:2 * 271].size, 3)})
                 temp['after'].update(
-                    {data: round(df[data].loc[2*271:].sum() / df[data].loc[2*271:].size, 3)})
+                    {data: round(df[data].loc[2 * 271:].sum() / df[data].loc[2 * 271:].size, 3)})
         return temp
-
-
-if __name__ == '__main__':
-    """
-    """
-    from tools.client import RemoteClient
-    c = RemoteClient('192.168.88.236')
-    d = Device(c)
-    print(d.show_stream_info())
-
-
