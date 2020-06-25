@@ -18,14 +18,19 @@ class Device:
     def __init__(self, client):
         self.client = client
         self.artifacts = self.get_artifacts()
-        self.timestr = strftime('%d-%m-%YT%H_%M')
+        self.__file_name = None
         self.ipc = IPC(self.client)
         self.rp = RP(self.client)
 
     @property
     def file_name(self):
-        return f'{self.timestr}_Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-' \
-               f'{self.artifacts["board_version"]}.txt'
+
+        if self.__file_name is None:
+            timestr = strftime('%d-%m-%YT%H_%M')
+            self.__file_name = f'{timestr}_Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-' \
+                               f'{self.artifacts["board_version"]}.txt'
+
+        return self.__file_name
 
     def restart_service(self, service='stream'):
         logger.info(f'restart service {service}')
