@@ -17,7 +17,7 @@ class Device:
 
     def __init__(self, client):
         self.client = client
-        self.artifacts = self.get_artifacts()
+        self.__artifacts = None
         self.__file_name = None
         self.ipc = IPC(self.client)
         self.rp = RP(self.client)
@@ -31,6 +31,22 @@ class Device:
                                f'{self.artifacts["board_version"]}.txt'
 
         return self.__file_name
+
+    @property
+    def artifacts(self):
+        """Collect artifacts from DUT"""
+        if self.__artifacts is None:
+            artifacts = dict()
+            abs_path = Path(__file__).parent.parent
+            with open(f'{abs_path}/configs/artifacts.yaml') as file:
+                tmp = yaml.load(file, Loader=yaml.FullLoader)
+            for k, v in tmp.items():
+                artifacts[k] = self.client.execute_command(v)
+            artifacts['solution'] = 'SIP' if 'unset' in artifacts['solution'] else 'RMS'
+            artifacts['date'] = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
+            self.__artifacts = artifacts
+
+        return self.__artifacts
 
     def restart_service(self, service='stream'):
         logger.info(f'restart service {service}')
@@ -55,18 +71,6 @@ class Device:
             )
         )
         return info
-
-    def get_artifacts(self):
-        """Collect artifacts from DUT"""
-        artifacts = dict()
-        abs_path = Path(__file__).parent.parent
-        with open(f'{abs_path}/configs/artifacts.yaml') as file:
-            tmp = yaml.load(file, Loader=yaml.FullLoader)
-        for k, v in tmp.items():
-            artifacts[k] = self.client.execute_command(v)
-        artifacts['solution'] = 'SIP' if 'unset' in artifacts['solution'] else 'RMS'
-        artifacts['date'] = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
-        return artifacts
 
     def avg_resources(self, idle=False):
         """
