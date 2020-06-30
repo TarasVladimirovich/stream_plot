@@ -1,4 +1,5 @@
 import re
+import logging
 
 import pandas as pd
 import plotly.graph_objects as go
@@ -7,6 +8,8 @@ from plotly.subplots import make_subplots
 from configs.settings import get_config, get_layout
 from tools.iohelper import IOhelper
 
+logger = logging.getLogger(__name__)
+
 
 class Builder:
 
@@ -14,16 +17,33 @@ class Builder:
         self.files = files
         self.artifacts = artifacts
         self.resources = resources
-        self.file_name = " VS ".join([file[file.rfind('/') + 1:] for file in self.files]).replace(".txt", "")
+        self.__file_name = None
+
+    @property
+    def file_name(self):
+
+        if self.__file_name is None:
+
+            if len(self.files) == 1:
+                self.__file_name = self.files[0][self.files[0].rfind('/') + 1:].replace(".txt", "")
+            else:
+                self.__file_name = " VS ".join([file[file.rfind('/') + 1:]
+                                                for file in self.files]).replace(".txt", "")
+                to_delete = re.findall('(\d+-\d+-\d+T\d+_\d+_)', self.__file_name)
+                for i in to_delete:
+                    self.__file_name = self.__file_name.replace(i, "")
+
+        return self.__file_name
 
     def create_file(self):
+
         traces = list()
 
         for file in self.files:
             try:
                 fw = re.search('-([A-Z]){3}-(.+?)-', file).group()[1:-1]
             except AttributeError as error:
-                print(error)
+                logger.error(error)
                 fw = file[file.rfind('/')+1:]
             data_frame = IOhelper().reader(file)
             traces += self.__create_traces(data_frame, fw)

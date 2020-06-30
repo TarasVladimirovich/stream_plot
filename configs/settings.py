@@ -18,9 +18,6 @@ def get_layout(file_name):
                   xaxis=dict(
                         tickmode='array',
                         title='Time',
-                        # rangeslider=dict(
-                        #                 visible=True,
-                        #                 ),
                         ),
                   font=dict(
                         size=8,

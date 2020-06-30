@@ -24,7 +24,11 @@ class ClientHelper:
         return response
 
     def connect(self):
-        """Open connection to remote host."""
+        """
+        Open connection to remote host.
+        :return: client
+        """
+
         self.__check_ping()
         try:
             client = SSHClient()
@@ -43,7 +47,10 @@ class ClientHelper:
             return client
 
     def create_scp_session(self):
-        """Create SCP session"""
+        """
+        Open connection to remote host.
+        :return: scp
+        """
         try:
             scp = SCPClient(self.connection.client.get_transport())
         except AuthenticationException as error:

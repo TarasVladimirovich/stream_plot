@@ -5,14 +5,10 @@ import logging
 
 import pandas as pd
 
-
 log = logging.getLogger(__name__)
 
 
 class IOhelper:
-
-    def __init__(self):
-        """"""
 
     @staticmethod
     def reader(file):
