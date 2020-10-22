@@ -4,7 +4,6 @@ from os import path, system
 from paramiko import SSHClient, AutoAddPolicy, AuthenticationException
 from scp import SCPClient
 
-
 log = logging.getLogger(__name__)
 
 
@@ -65,3 +64,18 @@ class ClientHelper:
         self.connection.client.close()
         self.connection.scp.close()
         log.info('Disconnected')
+
+
+if __name__ == '__main__':
+    def __check_ping(host):
+        log.info(f'ping {host}')
+        response = system(f'ping -n 1 {host}')
+        if response == 0:
+            log.info("Host is active, proceed the test")
+        else:
+            log.error('host is unreachable')
+            exit(1)
+        return response
+
+
+    print(__check_ping('10.100.163.145'))

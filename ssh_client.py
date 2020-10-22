@@ -19,9 +19,9 @@ log = logging.getLogger(__name__)
 
 @click.command()
 @click.option('--ip-addr', default='', help='Insert ip addres.', type=str)
-# @click.option('--profile',  default=None, help='Choose profile.', type=int)
-# @click.option('--bitrate',  default=None, help='Set bitrate.', type=int)
-# @click.option('--idle', is_flag=True, help='set flag, if need check IDLE')
+@click.option('--profile',  default=None, help='Choose profile.', type=int)
+@click.option('--bitrate',  default=None, help='Set bitrate.', type=int)
+@click.option('--idle', is_flag=True, help='set flag, if need check IDLE')
 def main(ip_addr, profile, bitrate, idle):
     client = RemoteClient(ip_addr)
     device = Device(client)
