@@ -1,5 +1,6 @@
 import logging
-from os import path, system
+from os import devnull, path, system
+from subprocess import check_call, CalledProcessError
 
 from paramiko import SSHClient, AutoAddPolicy, AuthenticationException
 from scp import SCPClient
@@ -13,14 +14,23 @@ class ClientHelper:
         self.connection = connection
 
     def __check_ping(self):
+        with open(devnull, 'w') as DEVNULL:
+            try:
+                check_call(
+                    ['ping', '-n', '1', self.connection.host],
+                    stdout=DEVNULL,  # suppress output
+                    stderr=DEVNULL
+                )
+                is_up = 0
+            except CalledProcessError:
+                is_up = 1
         log.info(f'ping {self.connection.host}')
-        response = system(f'ping -c 1 {self.connection.host} >/dev/null 2>&1 ')
-        if response == 0:
+        if is_up == 0:
             log.info("Host is active, proceed the test")
         else:
             log.error('host is unreachable')
             exit(1)
-        return response
+        return is_up
 
     def connect(self):
         """
@@ -31,11 +41,11 @@ class ClientHelper:
         self.__check_ping()
         try:
             client = SSHClient()
-            client.load_host_keys(path.expanduser('~/.ssh/known_hosts'))
+            client.load_system_host_keys()
             client.set_missing_host_key_policy(AutoAddPolicy)
             client.connect(self.connection.host,
                            username=self.connection.user,
-                           password='',
+                           password=self.connection.password,
                            look_for_keys=False,
                            timeout=5000)
         except AuthenticationException as error:
@@ -68,14 +78,20 @@ class ClientHelper:
 
 if __name__ == '__main__':
     def __check_ping(host):
-        log.info(f'ping {host}')
-        response = system(f'ping -n 1 {host}')
-        if response == 0:
-            log.info("Host is active, proceed the test")
-        else:
-            log.error('host is unreachable')
-            exit(1)
-        return response
+        import os
+        import subprocess
+
+        with open(os.devnull, 'w') as DEVNULL:
+            try:
+                subprocess.check_call(
+                    ['ping', '-n', '1', host],
+                    stdout=DEVNULL,  # suppress output
+                    stderr=DEVNULL
+                )
+                is_up = 0
+            except subprocess.CalledProcessError:
+                is_up = 1
+        return is_up
 
 
     print(__check_ping('10.100.163.145'))

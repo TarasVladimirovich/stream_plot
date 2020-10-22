@@ -2,7 +2,7 @@ from time import sleep
 
 import pytest
 
-from tools.device import Device
+from tools.MXserver import MXserver
 
 PROFILES = [
     [0, '(640x360) 10/10'],
@@ -13,12 +13,12 @@ PROFILES = [
 
 
 @pytest.mark.parametrize('profile, expected', PROFILES)
-def test_profile(device, profile, expected):
-    device.set_profile(profile)
-    assert device.show_stream_info() == expected
+def test_profile(mxserver, profile, expected):
+    mxserver.set_profile(profile)
+    assert mxserver.show_stream_info() == expected
 
 
-def test_probed(device):
+def test_probed(mxserver):
     pass
     # assert info[1] == '1234567'
 

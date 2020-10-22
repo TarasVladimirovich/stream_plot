@@ -11,9 +11,10 @@ log = logging.getLogger(__name__)
 
 class RemoteClient:
 
-    def __init__(self, host, user='root', ssh_key_filepath='', remote_path=''):
+    def __init__(self, host, user, password, ssh_key_filepath='', remote_path=''):
         self.host = host
         self.user = user
+        self.password = password
         self.connection = ClientHelper(self)
         self.client = self.connection.connect()
         self.scp = self.connection.create_scp_session()
@@ -55,6 +56,7 @@ class RemoteClient:
             response = stdout.readlines()
             if len(response) == 1:
                 response = response[0].strip()
+                log.info(response)
                 return response
             else:
                 for line in response:

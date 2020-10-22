@@ -7,34 +7,36 @@ import pandas as pd
 import yaml
 
 from tools.iohelper import IOhelper
-from lib.ipc import IPC
-from lib.rp import RP
+from lib.impctl import IMPCTL
 
 logger = logging.getLogger(__name__)
 
 
-class Device:
+class MXserver:
 
     def __init__(self, client):
         self.client = client
         self.__artifacts = None
         self.__file_name = None
-        self.ipc = IPC(self.client)
-        self.rp = RP(self.client)
+        self.impctl = IMPCTL(self.client)
 
     @property
     def file_name(self):
 
-        if self.__file_name is None:
-            timestr = strftime('%d-%m-%YT%H_%M')
-            self.__file_name = f'{timestr}_Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-' \
-                               f'{self.artifacts["board_version"]}.txt'
+        # if self.__file_name is None:
+        #     timestr = strftime('%d-%m-%YT%H_%M')
+        #     self.__file_name = f'{timestr}_Stream-{self.artifacts["solution"]}-{self.artifacts["fw"]}-' \
+        #                        f'{self.artifacts["board_version"]}.txt'
 
-        return self.__file_name
+        # return self.__file_name
+        return 'tarastest.txt'
 
     @property
     def artifacts(self):
-        """Collect artifacts from DUT"""
+        """
+        Need to refactor
+        :return: Dictionary with artifacts
+        """
         if self.__artifacts is None:
             artifacts = dict()
             abs_path = Path(__file__).parent.parent
@@ -42,13 +44,12 @@ class Device:
                 tmp = yaml.load(file, Loader=yaml.FullLoader)
             for k, v in tmp.items():
                 artifacts[k] = self.client.execute_command(v)
-            artifacts['solution'] = 'SIP' if 'unset' in artifacts['solution'] else 'RMS'
             artifacts['date'] = datetime.datetime.now().strftime('%d-%m-%Y_%H:%M:%S')
             self.__artifacts = artifacts
 
         return self.__artifacts
 
-    def restart_service(self, service='stream'):
+    def restart_service(self, service):
         logger.info(f'restart service {service}')
         self.client.execute_command(f'systemctl restart {service}')
 
@@ -64,13 +65,8 @@ class Device:
         return self.client.execute_command(
             f"systemctl status {service} | awk '/Main PID/{{print $3}}'")
 
-    def show_stream_info(self):
-        info = (
-            self.client.execute_command(
-                "test_encode --show-stream-info | awk 'FNR==8{res=$3} FNR==13{print res, $4}' "
-            )
-        )
-        return info
+    def pidof(self, program: str) -> str:
+        return self.client.execute_command(f"pidof {program}")
 
     def avg_resources(self, idle=False):
         """

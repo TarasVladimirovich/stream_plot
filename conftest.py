@@ -2,7 +2,7 @@ import pytest
 import logging
 
 from tools.client import RemoteClient
-from tools.device import Device
+from tools.MXserver import MXserver
 from tools.builder import Builder
 
 
@@ -22,9 +22,9 @@ COMMANDS_CLEAN = ['rm -rf /usr/share/terminfo/d',
 
 
 @pytest.fixture(scope="session")
-def device(request):
+def mxserver(request):
     client = RemoteClient(HOST)
-    device = Device(client)
+    device = MXserver(client)
 
     def client_teardown():
         # builder = Builder([device.client.saved_filepath], [device.artifacts])
@@ -48,15 +48,15 @@ def profile_fixture(request):
 
 
 @pytest.fixture(scope="function")
-def resources_prepare(request, device):
+def resources_prepare(request, mxserver):
     log.info("==== Prepare test ====")
     log.info('Prepare setup \n {}'.format(' ;\n '.join(COMMANDS_PREPARE)))
-    device.client.execute_commands(COMMANDS_PREPARE)
+    mxserver.client.execute_commands(COMMANDS_PREPARE)
 
     def clean_setup():
         log.info("==== Clean DUT ====")
         log.info('Clean setup \n {}'.format(' ;\n '.join(COMMANDS_CLEAN)))
-        device.client.execute_commands(COMMANDS_CLEAN)
+        mxserver.client.execute_commands(COMMANDS_CLEAN)
 
     request.addfinalizer(clean_setup)
 
