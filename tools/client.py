@@ -52,6 +52,7 @@ class RemoteClient:
         """
         stdin, stdout, stderr = self.client.exec_command(cmd)
         status = stdout.channel.recv_exit_status()
+        log.info(f'Execute command: {cmd}')
         if status == 0:
             response = stdout.readlines()
             if len(response) == 1:

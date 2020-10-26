@@ -1,0 +1,4 @@
+# Time units
+SECOND = 1
+MINUTE = 60 * SECOND
+HOUR = 60 * MINUTE

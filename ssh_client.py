@@ -1,9 +1,8 @@
 import logging
 import sys
 
-from tools.builder import Builder
 from tools.MXserver import MXserver
-from tools.resources import test_5_min
+from lib.resources_monitor import test_5_min
 from tools.client import RemoteClient
 
 import click
@@ -24,17 +23,12 @@ log = logging.getLogger(__name__)
 def main(ip_addr, user, password):
     client = RemoteClient(ip_addr, user, password)
     mxserver = MXserver(client)
-    mxserver.client.execute_command(" timeout 60 top -b -d 1 -p 32018 | awk '/^%Cpu0/{id0=$9; sy0=$5} "
-                                    "/^%Cpu1/{id1=$9; sy1=$5} /^%Cpu2/{id2=$9; sy2=$5} "
-                                    "/^%Cpu3/{id3=$9; sy3=$5} "
-                                    "/32018+ mxserver/{print id0,sy0,id1,sy1,id2,sy2,id3,sy3,mem,$9,$10}'"
-                                    " >> /tmp/tarastest.txt&")
-    # test_5_min(mxserver)
-    #
+    # mxserver.client.execute_command('ping 8.8.8.8')
+    test_5_min(mxserver)
     # log.info("Create file")
     # builder = Builder([device.client.saved_filepath], device.artifacts, device.avg_resources(idle))
     # builder.create_file()
-    # device.client.connection.disconnect()
+    mxserver.client.connection.disconnect()
     log.info('====Done====')
 
 
