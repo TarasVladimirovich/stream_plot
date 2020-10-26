@@ -1,8 +1,9 @@
 import logging
 import sys
 
+from tests.test_resources_consumption import test_5_min
 from tools.MXserver import MXserver
-from lib.resources_monitor import test_5_min
+from lib.resources_monitor import ResourcesMonitor
 from tools.client import RemoteClient
 
 import click
@@ -24,7 +25,7 @@ def main(ip_addr, user, password):
     client = RemoteClient(ip_addr, user, password)
     mxserver = MXserver(client)
     # mxserver.client.execute_command('ping 8.8.8.8')
-    test_5_min(mxserver)
+    # test_5_min(mxserver)
     # log.info("Create file")
     # builder = Builder([device.client.saved_filepath], device.artifacts, device.avg_resources(idle))
     # builder.create_file()

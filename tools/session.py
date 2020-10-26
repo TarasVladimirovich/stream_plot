@@ -1,5 +1,5 @@
 import logging
-from os import devnull, path, system
+from os import devnull
 from subprocess import check_call, CalledProcessError
 
 from paramiko import SSHClient, AutoAddPolicy, AuthenticationException
