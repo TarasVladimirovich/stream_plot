@@ -1,10 +1,8 @@
 import logging
 import sys
 
-from tests.test_resources_consumption import test_5_min
-from tools.MXserver import MXserver
-from lib.resources_monitor import ResourcesMonitor
-from tools.client import RemoteClient
+from lib.MXserver import MXserver
+from tools.ssh_client import SSHClient
 
 import click
 
@@ -22,7 +20,7 @@ log = logging.getLogger(__name__)
 @click.option('--user', default='root', help='Input server user.', type=str)
 @click.option('--password', default='Barbapapa12#', help='Input server password.', type=str)
 def main(ip_addr, user, password):
-    client = RemoteClient(ip_addr, user, password)
+    client = SSHClient(ip_addr, user, password)
     mxserver = MXserver(client)
     # mxserver.client.execute_command('ping 8.8.8.8')
     # test_5_min(mxserver)

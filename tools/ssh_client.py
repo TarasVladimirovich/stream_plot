@@ -9,7 +9,7 @@ from tools.session import ClientHelper
 log = logging.getLogger(__name__)
 
 
-class RemoteClient:
+class SSHClient:
 
     def __init__(self, host, user, password, ssh_key_filepath='', remote_path=''):
         self.host = host

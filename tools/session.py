@@ -74,24 +74,3 @@ class ClientHelper:
         self.connection.client.close()
         self.connection.scp.close()
         log.info('Disconnected')
-
-
-if __name__ == '__main__':
-    def __check_ping(host):
-        import os
-        import subprocess
-
-        with open(os.devnull, 'w') as DEVNULL:
-            try:
-                subprocess.check_call(
-                    ['ping', '-n', '1', host],
-                    stdout=DEVNULL,  # suppress output
-                    stderr=DEVNULL
-                )
-                is_up = 0
-            except subprocess.CalledProcessError:
-                is_up = 1
-        return is_up
-
-
-    print(__check_ping('10.100.163.145'))

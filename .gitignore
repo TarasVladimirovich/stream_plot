@@ -7,3 +7,4 @@ files/
 .DS_Store
 results/
 configs/configs.yaml
+/configs/config.yaml

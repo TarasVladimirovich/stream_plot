@@ -13,10 +13,10 @@ def test_5_min(mxserver, resources_prepare, time_out=310):
     # mxserver.client.execute_commands(
     #     [f'echo idle Stream StreamMem Pulseaudio PulseMem Ivaapp sys > /tmp/{mxserver.file_name}'])
 
-    logger.info('==== Start test =====')
+    logger.info('======== Start test =========')
 
     mxserver.client.execute_command(resource.generate_executor_script(time_out))
     time.sleep(time_out)
 
     # mxserver.client.download_file(file=f'/tmp/{mxserver.file_name}')
-    logger.info('==== End test ====')
+    logger.info('======== End test ========')

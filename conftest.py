@@ -1,33 +1,36 @@
-import pytest
 import logging
+import pytest
+from pathlib import Path
+import yaml
 
-from tools.client import RemoteClient
-from tools.MXserver import MXserver
-from tools.builder import Builder
+from lib.MXserver import MXserver
 
 log = logging.getLogger(__name__)
-
-HOST = '10.100.163.145'
 
 
 @pytest.fixture(scope="session")
 def mxserver(request):
-    client = RemoteClient(HOST, 'root', 'Barbapapa12#')
-    device = MXserver(client)
+
+    abs_path = Path(__file__).parent
+    with open(f'{abs_path}\\configs\\config.yaml') as file:
+        configs = yaml.load(file, Loader=yaml.FullLoader)
+
+    mxserver = MXserver(
+                        ip=configs['mxIp'],
+                        user=configs['mxuser'],
+                        password=configs['password'],
+                        ssh_user=configs['ssh_user'],
+                        ssh_password=configs['ssh_password'],
+                      )
 
     def client_teardown():
         # builder = Builder([device.client.saved_filepath], [device.artifacts])
         # builder.create_file()
         print("\ndisconnect")
-        device.client.connection.disconnect()
+        mxserver.client.connection.disconnect()
 
     request.addfinalizer(client_teardown)
-    return device
-
-
-@pytest.fixture(scope="function")
-def profile_fixture(request):
-    return request.param
+    return mxserver
 
 
 @pytest.fixture(scope="function")
@@ -39,11 +42,3 @@ def resources_prepare(request, mxserver):
 
     request.addfinalizer(clean_setup)
 
-
-def pytest_addoption(parser):
-    parser.addoption(
-        '--profile',
-        action='store',
-        default=3,
-        type=int,
-        help='Choose profile')

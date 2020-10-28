@@ -1,5 +1,0 @@
-mac:
-    cat /sys/class/net/wlan0/address
-fw:
-    uname -r | cut -d ":" -f2
-
