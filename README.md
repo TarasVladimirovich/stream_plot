@@ -1,4 +1,4 @@
-## Stream_Plot
+## Private Test Project
 
 To run plot -> run in your venv.
 
@@ -16,19 +16,19 @@ Notice: don't forget to keep repo up-to-date.
 * Install requirements: `pip install -r requirements.txt`
 
 ## Configuration
-TO be continued.....
+To be continued.....
 
-## How to run stream_plot
+## How to run script
 ```bash
 # activate venv
 source VENVNAME/bin/activate
 
-# Run plot in your VENV
+# Run plot to build graphics
 # Builds plot from fales:
 python3 plot.py FILENAME
 python3 plot.py FILENAME FILENAME2
 
 # Run resources test
-python ssh_client.py <IP_addr>
+TO be continued.....
 ```
 ##

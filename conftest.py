@@ -1,7 +1,9 @@
 import logging
-import pytest
-from pathlib import Path
 import yaml
+from pathlib import Path
+from os.path import dirname, join
+
+import pytest
 
 from lib.MXserver import MXserver
 
@@ -10,18 +12,16 @@ log = logging.getLogger(__name__)
 
 @pytest.fixture(scope="session")
 def mxserver(request):
-
-    abs_path = Path(__file__).parent
-    with open(f'{abs_path}\\configs\\config.yaml') as file:
+    with open(join(dirname(Path(__file__)), 'configs/config.yaml')) as file:
         configs = yaml.load(file, Loader=yaml.FullLoader)
 
     mxserver = MXserver(
-                        ip=configs['mxIp'],
-                        user=configs['mxuser'],
-                        password=configs['password'],
-                        ssh_user=configs['ssh_user'],
-                        ssh_password=configs['ssh_password'],
-                      )
+        ip=configs['mxIp'],
+        user=configs['mxuser'],
+        password=configs['password'],
+        ssh_user=configs['ssh_user'],
+        ssh_password=configs['ssh_password'],
+    )
 
     def client_teardown():
         # builder = Builder([device.client.saved_filepath], [device.artifacts])
@@ -33,12 +33,21 @@ def mxserver(request):
     return mxserver
 
 
-@pytest.fixture(scope="function")
-def resources_prepare(request, mxserver):
-    log.info("==== Prepare test ====")
+@pytest.fixture(scope="function", params=[
+    (('admin', 'Barbapapa12#'), 200),
+    (('admin', 'Barbapapa12'), 401),
+    (('admin', ''), 401),
+    (('', ''), 401),
+    (('', 'Barbapapa12#'), 401),
+    (('Barbapapa12#', 'Barbapapa12#'), 401),
+    (('admin', 'admin'), 401),
+],
+                ids=['correct', 'inc pas', 'empty pass', 'empty', 'empty user', 'two pass', 'two user']
+                )
+def param_test_auth(request):
+    return request.param
 
-    def clean_setup():
-        log.info("==== Clean DUT ====")
 
-    request.addfinalizer(clean_setup)
-
+def pytest_generate_tests(metafunc):
+    for fixture in metafunc.fixturenames:
+        print(fixture)
