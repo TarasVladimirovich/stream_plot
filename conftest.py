@@ -6,6 +6,7 @@ from os.path import dirname, join
 import pytest
 
 from lib.MXserver import MXserver
+from lib.auth_manager import AuthManager
 
 log = logging.getLogger(__name__)
 
@@ -26,28 +27,14 @@ def mxserver(request):
     def client_teardown():
         # builder = Builder([device.client.saved_filepath], [device.artifacts])
         # builder.create_file()
-        print("\ndisconnect")
+        log.info("\ndisconnect")
         mxserver.client.connection.disconnect()
 
     request.addfinalizer(client_teardown)
     return mxserver
 
 
-@pytest.fixture(scope="function", params=[
-    (('admin', 'Barbapapa12#'), 200),
-    (('admin', 'Barbapapa12'), 401),
-    (('admin', ''), 401),
-    (('', ''), 401),
-    (('', 'Barbapapa12#'), 401),
-    (('Barbapapa12#', 'Barbapapa12#'), 401),
-    (('admin', 'admin'), 401),
-],
-                ids=['correct', 'inc pas', 'empty pass', 'empty', 'empty user', 'two pass', 'two user']
-                )
-def param_test_auth(request):
-    return request.param
-
-
-def pytest_generate_tests(metafunc):
-    for fixture in metafunc.fixturenames:
-        print(fixture)
+@pytest.fixture(scope="session")
+def app(request, mxserver):
+    auth = AuthManager(mxserver)
+    return auth.get_JSESSIONID()
