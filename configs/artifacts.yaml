@@ -1,8 +1,0 @@
-board_version:
-    /ring/bin/rp get hw.board_version --raw
-mac:
-    cat /sys/class/net/wlan0/address
-fw:
-    uname -r | cut -d ":" -f2
-solution:
-    /ring/bin/rp get stream.rms_enabled --raw
