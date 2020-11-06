@@ -5,16 +5,17 @@ import random
 import pytest
 
 from lib.auth_manager import AuthManager
+from configs.env_variable import STANDARD_USER, STANDARD_PASS
 
 logger = logging.getLogger(__name__)
 
-SUCCESSFUL_CRED = [('admin', 'Barbapapa12#'), 200]
-TWO_USER = [('admin', 'admin'), 401]
-TWO_PASS = [('Barbapapa12#', 'Barbapapa12#'), 401]
+SUCCESSFUL_CRED = [(STANDARD_USER, STANDARD_PASS), 200]
+TWO_USER = [(STANDARD_USER, STANDARD_USER), 401]
+TWO_PASS = [(STANDARD_PASS, STANDARD_PASS), 401]
 EMPTY = [('', ''), 401]
 SPACES = [(' ', ' '), 401]
-ONLY_PASS = [('', 'Barbapapa12#'), 401]
-ONLY_USER = [('admin', ''), 401]
+ONLY_PASS = [('', STANDARD_PASS), 401]
+ONLY_USER = [(STANDARD_USER, ''), 401]
 
 
 def random_auth():
