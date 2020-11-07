@@ -21,7 +21,6 @@ class MXserver:
         self.password = password
         self.ssh_user = ssh_user
         self.ssh_password = ssh_password
-
         self.client = SSHClient(self.ip, self.ssh_user, self.ssh_password)
         self.impctl = IMPCTL(self.client)
 
@@ -47,6 +46,10 @@ class MXserver:
 
     def pidof(self, program: str) -> str:
         return self.client.execute_command(f"pidof {program}")
+
+    def __str__(self):
+        return f'ip: {self.ip}, user: {self.user}, ' \
+               f'password: {self.password}'
 
     # def avg_resources(self, idle=False):
     #     """

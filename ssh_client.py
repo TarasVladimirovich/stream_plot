@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from lib.MXserver import MXserver
+from lib.mxserver import MXserver
 from tools.ssh_client import SSHClient
 
 import click

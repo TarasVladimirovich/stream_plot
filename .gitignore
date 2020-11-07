@@ -9,3 +9,4 @@ results/
 configs/configs.yaml
 /configs/config.yaml
 /configs/env_variable.py
+/tests/q.py

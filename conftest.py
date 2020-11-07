@@ -5,8 +5,8 @@ from os.path import dirname, join
 
 import pytest
 
-from lib.MXserver import MXserver
-from lib.auth_manager import AuthManager
+from lib.mxserver import MXserver
+from api.auth_manager import AuthManager
 
 log = logging.getLogger(__name__)
 
@@ -31,6 +31,7 @@ def mxserver(request):
         mxserver.client.connection.disconnect()
 
     request.addfinalizer(client_teardown)
+
     return mxserver
 
 
