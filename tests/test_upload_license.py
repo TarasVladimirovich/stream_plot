@@ -25,7 +25,7 @@ def test_upload_license(mxserver, app):
     flex_protect = ''
     expected = 400
     lic = UploadLicense(mxserver)
-    response = lic.register_mx(flex_protect, app)
+    response = lic.register_mx_by_fxp(flex_protect, app)
     logger.info(f'input_flex_protect: {flex_protect}\n')
     logger.info(response.text)
     assert response.status_code == expected

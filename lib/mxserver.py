@@ -32,14 +32,6 @@ class MXserver:
         logger.info(f'restart service {service}')
         self.client.execute_command(f'systemctl restart {service}')
 
-    def make_write_fs(self):
-        logger.info('make file system for writing')
-        self.client.execute_command('mount -o remount,rw /')
-
-    def make_read_fs(self):
-        logger.info('make file reead only')
-        self.client.execute_command('mount -o remount,ro /')
-
     def service_pid(self, service: str) -> str:
         return self.client.execute_command(
             f"systemctl status {service} | awk '/Main PID/{{print $3}}'")

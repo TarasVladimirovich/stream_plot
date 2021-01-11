@@ -10,3 +10,4 @@ configs/configs.yaml
 /configs/config.yaml
 /configs/env_variable.py
 /tests/q.py
+/configs/mx_cert.cer
